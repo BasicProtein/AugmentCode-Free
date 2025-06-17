@@ -1,8 +1,13 @@
 # AugmentCode-Free
 AugmentCode无限免费续杯方案；新账号可获得600次免费的Claude Sonnet 4调用
+
+
 2025年6月18日更新：
+
 最新思路：
+
 team邀请方式：
+
 1.首先准备任意一个账号（被封禁的，试用到期的，用完免费次数的都可以），浏览器打开https://app.augmentcode.com/account/subscription
 获取个人中心页面，点击Team，再点击add member添加一个小号作为团队成员。
 
