@@ -10,12 +10,14 @@ team邀请方式：
 
 1.首先准备任意一个账号（被封禁的，试用到期的，用完免费次数的都可以），浏览器打开https://app.augmentcode.com/account/subscription
 获取个人中心页面，点击Team，再点击add member添加一个小号作为团队成员。
+![image](https://github.com/user-attachments/assets/caa0f8dc-d189-476f-bc3f-84ee0037e03b)
 
 
 2.这个小号可以用域名邮箱，随意。添加到团队里面后会收到一封激活邮件。
+![image](https://github.com/user-attachments/assets/63117ef9-1e9c-4641-99c1-9d3c9f56f435)
 
 
-3.点击邮件链接https://auth.augmentcode.com/invitations，用小号登录激活。按照提示走完流程即可。
+3.点击邮件链接https://auth.augmentcode.com/invitations   ，用小号登录激活。按照提示走完流程即可。
 
 4.执行下面的脚本清理本地环境配置，清理完毕后登录刚刚的小号。然后就可以稳定使用了，到目前为止，方法仍然有效。
 
