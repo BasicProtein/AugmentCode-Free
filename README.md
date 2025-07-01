@@ -23,6 +23,33 @@ team邀请方式：
 
 总结：大号随便什么号，封了的都可以，大号创建team拉小号，小号就可以无限用，注意一定要小号登录augment插件，登录前记得执行清理脚本。
 
+---
+
+
+# AugmentCode-Free
+AugmentCode unlimited free refill plan; new accounts can get 600 free Claude Sonnet 4 calls
+
+Updated on June 18, 2025:
+
+Latest ideas:
+
+Team invitation method:
+
+1. First prepare any account (banned, trial expired, or used up free times), open https://app.augmentcode.com/account/subscription in the browser
+Get the personal center page, click Team, and then click add member to add a small account as a team member.
+![image](https://github.com/user-attachments/assets/caa0f8dc-d189-476f-bc3f-84ee0037e03b)
+
+2. This small account can use a domain name email, as you like. You will receive an activation email after adding it to the team.
+![image](https://github.com/user-attachments/assets/63117ef9-1e9c-4641-99c1-9d3c9f56f435)
+
+3. Click the email link https://auth.augmentcode.com/invitations and log in with the secondary account to activate. Follow the prompts to complete the process.
+
+4. Execute the following script to clean up the local environment configuration, and log in to the secondary account just now after cleaning. Then you can use it stably. So far, the method is still effective.
+
+Summary: The primary account can be any account, even if it is blocked. The primary account can create a team and pull the secondary account, and the secondary account can be used unlimitedly. Note that you must log in to the augmentation plug-in with the secondary account, and remember to execute the cleanup script before logging in.
+
+---
+
 <p align="center">
   <a href="#english">English</a> | <a href="#中文">中文</a>
 </p>
