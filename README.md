@@ -90,6 +90,20 @@ Summary: The primary account can be any account, even if it is blocked. The prim
 
 ## Usage
 
+**Notes**:
+- Please log out of your AugmentCode account before use
+- Close the IDE background and run the script
+
+**Notes**:
+- Please log out of your AugmentCode account before use
+- Close the IDE background and run the script
+
+**Notes**:
+- Please log out of your AugmentCode account before use
+- Close the IDE background and run the script
+
+**(Important things should be said three times!)**
+
 You can use AugmentCode-Free in two ways:
 
 ### 1. Graphical User Interface (GUI) - Recommended
@@ -155,6 +169,20 @@ Use these tools at your own risk. Always back up important data before running m
     ```
 
 ## 使用方法
+
+**注意事项**：
+ - 使用前请确保退出AugmentCode账号的登录
+ - 关闭IDE后台再运行脚本
+
+**注意事项**：
+ - 使用前请确保退出AugmentCode账号的登录
+ - 关闭IDE后台再运行脚本
+
+**注意事项**：
+ - 使用前请确保退出AugmentCode账号的登录
+ - 关闭IDE后台再运行脚本
+
+**（重要的事情说三遍！）**
 
 您可以通过两种方式使用 AugmentCode-Free：
 
