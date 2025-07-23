@@ -9,6 +9,7 @@ from tkinter import ttk
 import threading
 import sys
 from pathlib import Path
+from typing import List
 import queue
 import time
 import subprocess
@@ -276,11 +277,56 @@ def show_warning(parent, title, message):
     return dialog.show()
 
 
+class IDESelector(tk.Frame):
+    """Modern pill-style selector for choosing IDE"""
+    def __init__(self, parent, variable: tk.StringVar, options: List[str], **kwargs):
+        super().__init__(parent, bg='#f5f5f5', **kwargs)
+        self.var = variable
+        self.options = options
+        self.buttons: List[tk.Label] = []
+
+        for opt in options:
+            btn = tk.Label(
+                self,
+                text=opt,
+                font=('Microsoft YaHei', 11),
+                bg='#e5e7eb',
+                fg='#374151',
+                bd=0,
+                padx=14,
+                pady=8,
+                cursor='hand2'
+            )
+            btn.pack(side='left', expand=True, fill='x', padx=4)
+            btn.bind('<Button-1>', lambda _e, v=opt: self.select(v))
+            btn.bind('<Enter>', lambda _e, b=btn: self._on_enter(b))
+            btn.bind('<Leave>', lambda _e, b=btn: self._on_leave(b))
+            self.buttons.append(btn)
+        self.select(self.var.get())
+
+    def select(self, value: str):
+        if value not in self.options:
+            value = self.options[0]
+        self.var.set(value)
+        for btn in self.buttons:
+            if btn.cget('text') == value:
+                btn.config(bg='#4f46e5', fg='#ffffff')
+            else:
+                btn.config(bg='#e5e7eb', fg='#374151')
+
+    def _on_enter(self, btn: tk.Label):
+        if btn.cget('text') != self.var.get():
+            btn.config(bg='#d1d5db')
+
+    def _on_leave(self, btn: tk.Label):
+        if btn.cget('text') != self.var.get():
+            btn.config(bg='#e5e7eb')
+
 class AugmentToolsGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("AugmentCode-Free")
-        self.root.geometry("420x680")  # Increased height for new IDE selector
+        self.root.geometry("420x720")  # Increased height for new IDE selector
         self.root.resizable(False, False)
 
         # Set window style like CursorPro
@@ -353,21 +399,9 @@ class AugmentToolsGUI:
 
         # Create styled combobox
         style = ttk.Style()
-        style.theme_use('clam')
-        style.configure('Custom.TCombobox',
-                       fieldbackground='#ffffff',
-                       background='#ffffff',
-                       borderwidth=0,
-                       relief='flat')
-
         self.ide_var = tk.StringVar(value="VS Code")
-        self.ide_combo = ttk.Combobox(ide_select_frame, 
-                                     textvariable=self.ide_var,
-                                     values=["VS Code", "Cursor", "Windsurf"],
-                                     state="readonly",
-                                     font=('Microsoft YaHei', 10),
-                                     style='Custom.TCombobox')
-        self.ide_combo.pack(fill='x', padx=10, pady=8)
+        ide_selector = IDESelector(main_frame, self.ide_var, ["VS Code", "Cursor", "Windsurf"])
+        ide_selector.pack(fill='x', pady=(0, 20))
 
         # Buttons container
         buttons_frame = tk.Frame(main_frame, bg='#f5f5f5')
@@ -393,11 +427,29 @@ class AugmentToolsGUI:
         # Set default keyword (no UI input needed)
         self.keyword_var = tk.StringVar(value="augment")
 
+        # Project info footer
+        footer_frame = tk.Frame(main_frame, bg='#f5f5f5')
+        footer_frame.pack(fill='x', pady=(0, 0))
+
+        link_label = tk.Label(footer_frame, text="GitHub: BasicProtein/AugmentCode-Free",
+                              font=('Microsoft YaHei', 10, 'underline'), fg='#2563eb', bg='#f5f5f5', cursor='hand2', wraplength=360, justify='center')
+        link_label.pack()
+        import webbrowser
+        link_label.bind("<Button-1>", lambda _e: webbrowser.open("https://github.com/BasicProtein/AugmentCode-Free"))
+
+        free_label = tk.Label(footer_frame, text="完全免费开源", font=('Microsoft YaHei', 10), wraplength=380, justify='center',
+                             fg='#6b7280', bg='#f5f5f5')
+        free_label.pack()
+
+        thanks_label = tk.Label(footer_frame, text="感谢 BasicProtein、YuHan1015 的贡献！", wraplength=380, justify='center',
+                               font=('Microsoft YaHei', 10), fg='#6b7280', bg='#f5f5f5')
+        thanks_label.pack()
+
         # Version info at bottom (like CursorPro)
         version_frame = tk.Frame(main_frame, bg='#f5f5f5')
-        version_frame.pack(fill='x', pady=(40, 20))  # More space at bottom
+        version_frame.pack(fill='x', pady=(5, 10))  # More space at bottom
 
-        version_label = tk.Label(version_frame, text="v0.0.3 - 多IDE支持版本",
+        version_label = tk.Label(version_frame, text="v0.0.4 - UI美化版本",
                                 font=('Microsoft YaHei', 12),
                                 fg='#9ca3af', bg='#f5f5f5')
         version_label.pack()

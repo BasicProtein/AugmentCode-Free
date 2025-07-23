@@ -1,15 +1,18 @@
 # AugmentCode-Free v1.0.0
 
-AugmentCode无限免费续杯方案；新账号可获得600次免费的Claude Sonnet 4调用
+# AugmentCode-Free-Chinese
+AugmentCode无限免费续杯方案；新账号可获得7天125次免费的Claude Sonnet 4调用次数
 
 **支持多IDE**: VS Code、Cursor、Windsurf 的专业维护工具包
+
+**注意**: 不支持JetBrains IDE!
 
 [![GitHub release](https://img.shields.io/github/v/release/BasicProtein/AugmentCode-Free)](https://github.com/BasicProtein/AugmentCode-Free/releases)
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/BasicProtein/AugmentCode-Free)
 
-2025年6月18日更新：
+2025年7月23日更新：
 
 最新思路：
 
@@ -30,15 +33,23 @@ team邀请方式：
 
 总结：大号随便什么号，封了的都可以，大号创建team拉小号，小号就可以无限用，注意一定要小号登录augment插件，登录前记得执行清理脚本。
 
+注意：现在拉取Team不会再增加使用次数!!!!
+
+**更新日志**:
+
+v0.0.4 | 2025年7月23日
+- 美化了选择IDE的界面
 ---
 
 
-# AugmentCode-Free
-AugmentCode unlimited free refill plan; new accounts can get 600 free Claude Sonnet 4 calls
+# AugmentCode-Free-English
+AugmentCode unlimited free refill plan; new accounts can get 7 days 125 free Claude Sonnet 4 calls
 
 **Multi-IDE Support**: Maintenance toolkit for VS Code, Cursor, and Windsurf
 
-Updated on June 18, 2025:
+**Notice**: Does not support JetBrains IDE!
+
+Updated on July 23, 2025:
 
 Latest ideas:
 
@@ -57,6 +68,12 @@ Get the personal center page, click Team, and then click add member to add a sma
 
 Summary: The primary account can be any account, even if it is blocked. The primary account can create a team and pull the secondary account, and the secondary account can be used unlimitedly. Note that you must log in to the augmentation plug-in with the secondary account, and remember to execute the cleanup script before logging in.
 
+Note:Now the team invitation method will not increase the number of uses!!!
+
+**Update Log**:
+
+v0.0.4 | 2025/7/23
+- Beautify the interface for selecting an IDE
 ---
 
 <p align="center">
