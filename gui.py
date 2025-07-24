@@ -80,10 +80,12 @@ class CursorProButton(tk.Frame):
         self.canvas.bind('<Button-1>', self.on_click)
         self.canvas.bind('<Enter>', self.on_enter)
         self.canvas.bind('<Leave>', self.on_leave)
+        # Redraw when either the frame or the canvas itself is resized.
         self.bind('<Configure>', self.on_resize)
+        self.canvas.bind('<Configure>', self.on_resize)
 
-        # Initial draw
-        self.after(1, self._draw_button)
+        # Initial draw (will retry until size is valid)
+        self.after(10, self._draw_button)
 
     def _draw_button(self):
         """Draw the button with current state"""
@@ -274,15 +276,27 @@ class WelcomePage:
         # Style for combobox
         style = ttk.Style()
         style.theme_use('clam')
+        # Modern flat style for combobox
         style.configure('Welcome.TCombobox',
-                       fieldbackground='#ffffff',
-                       background='#ffffff',
-                       borderwidth=0,
-                       relief='flat')
+                       fieldbackground='#ffffff',  # inner field
+                       background='#ffffff',       # outer frame
+                       bordercolor='#d1d5db',      # border colour
+                       lightcolor='#d1d5db',
+                       darkcolor='#d1d5db',
+                       borderwidth=1,
+                       relief='flat',
+                       padding=4,
+                       arrowcolor='#4f46e5')
+        style.map('Welcome.TCombobox',
+                   fieldbackground=[('active', '#ffffff')],
+                   background=[('active', '#ffffff')],
+                   bordercolor=[('focus', '#4f46e5')],
+                   arrowcolor=[('active', '#4f46e5'), ('!active', '#6b7280')])
         
         self.language_var = tk.StringVar()
         available_langs = self.language_manager.get_available_languages()
-        lang_values = list(available_langs.values())
+        # Remove duplicates while preserving order
+        lang_values = list(dict.fromkeys(available_langs.values()))
         
         # Set current language as default
         current_lang = self.language_manager.get_language()
@@ -290,13 +304,27 @@ class WelcomePage:
         self.language_var.set(current_display)
         
         self.language_combo = ttk.Combobox(lang_select_frame,
-                                          textvariable=self.language_var,
+                                          
+                                 textvariable=self.language_var,
                                           values=lang_values,
                                           state="readonly",
                                           font=('Microsoft YaHei', 10),
                                           style='Welcome.TCombobox')
-        self.language_combo.pack(fill='x', padx=12, pady=8)
-        self.language_combo.bind('<<ComboboxSelected>>', self._on_language_change)
+        # Hide legacy combobox
+        self.language_combo.pack_forget()
+        # Create radio-button style selector
+        style.configure('Lang.TRadiobutton', background='#ffffff', foreground='#374151', font=('Microsoft YaHei', 10))
+        style.map('Lang.TRadiobutton',
+                   foreground=[('active', '#4338ca'), ('selected', '#4338ca')])
+        for display in lang_values:
+            rb = ttk.Radiobutton(lang_select_frame,
+                                 text=display,
+                                 value=display,
+                                 takefocus=False,
+                                 textvariable=self.language_var,
+                                 command=lambda d=display: self._on_language_change(),
+                                 style='Lang.TRadiobutton')
+            rb.pack(side='left', padx=20, pady=6)
         
         # Welcome message
         message_frame = tk.Frame(main_frame, bg='#f5f5f5')
@@ -461,28 +489,52 @@ class MainPage:
         # Language combobox
         style = ttk.Style()
         style.theme_use('clam')
+        # Consistent modern style for language combobox
         style.configure('Lang.TCombobox',
                        fieldbackground='#ffffff',
                        background='#ffffff',
+                       bordercolor='#d1d5db',
+                       lightcolor='#d1d5db',
+                       darkcolor='#d1d5db',
                        borderwidth=1,
-                       relief='solid')
+                       relief='flat',
+                       padding=3,
+                       arrowcolor='#4f46e5')
+        style.map('Lang.TCombobox',
+                   bordercolor=[('focus', '#4f46e5')],
+                   arrowcolor=[('active', '#4f46e5'), ('!active', '#6b7280')])
 
         self.language_var = tk.StringVar()
         available_langs = self.language_manager.get_available_languages()
-        lang_values = list(available_langs.values())
+        # Remove duplicates while preserving order
+        lang_values = list(dict.fromkeys(available_langs.values()))
         current_lang = self.language_manager.get_language()
         current_display = available_langs.get(current_lang, lang_values[0])
         self.language_var.set(current_display)
 
         self.language_combo = ttk.Combobox(lang_frame,
-                                          textvariable=self.language_var,
+                                          
+                                 textvariable=self.language_var,
                                           values=lang_values,
                                           state="readonly",
                                           font=('Microsoft YaHei', 9),
                                           style='Lang.TCombobox',
                                           width=12)
-        self.language_combo.pack(side='left')
-        self.language_combo.bind('<<ComboboxSelected>>', self._on_language_change)
+        # Hide legacy combobox
+        self.language_combo.pack_forget()
+        # Radio-button style selector
+        style.configure('Lang2.TRadiobutton', background='#f5f5f5', foreground='#374151', font=('Microsoft YaHei', 9))
+        style.map('Lang2.TRadiobutton',
+                   foreground=[('active', '#4338ca'), ('selected', '#4338ca')])
+        for display in lang_values:
+            rb = ttk.Radiobutton(lang_frame,
+                                 text=display,
+                                 value=display,
+                                 takefocus=False,
+                                 textvariable=self.language_var,
+                                 command=lambda d=display: self._on_language_change(),
+                                 style='Lang2.TRadiobutton')
+            rb.pack(side='left', padx=20)
 
         # About button (right side)
         about_btn = tk.Button(top_bar, text=get_text("app.about"),
@@ -527,27 +579,60 @@ class MainPage:
         self.ui_elements['ide_label'] = ide_label
 
         # IDE selection frame
-        ide_select_frame = tk.Frame(ide_section, bg='#ffffff', relief='solid', bd=1)
+        ide_select_frame = tk.Frame(ide_section, bg='#ffffff', relief='flat', bd=0)
         ide_select_frame.pack(fill='x', pady=(0, 10))
 
         # Create styled combobox
+        # IDE selector combobox style
+        # Modern flat style for IDE combobox
         style.configure('Custom.TCombobox',
                        fieldbackground='#ffffff',
                        background='#ffffff',
-                       borderwidth=0,
-                       relief='flat')
+                       bordercolor='#d1d5db',
+                       lightcolor='#d1d5db',
+                       darkcolor='#d1d5db',
+                       borderwidth=1,
+                       relief='flat',
+                       padding=4,
+                       arrowcolor='#4f46e5')
+        style.map('Custom.TCombobox',
+                   bordercolor=[('focus', '#4f46e5')],
+                   arrowcolor=[('active', '#4f46e5'), ('!active', '#6b7280')])
 
         # Get last selected IDE from config
         last_ide = self.config_manager.get_last_selected_ide()
         self.ide_var = tk.StringVar(value=last_ide)
-        self.ide_combo = ttk.Combobox(ide_select_frame,
-                                     textvariable=self.ide_var,
-                                     values=["VS Code", "Cursor", "Windsurf"],
-                                     state="readonly",
-                                     font=('Microsoft YaHei', 10),
-                                     style='Custom.TCombobox')
-        self.ide_combo.pack(fill='x', padx=10, pady=8)
-        self.ide_combo.bind('<<ComboboxSelected>>', self._on_ide_change)
+        # Hide legacy combobox and use flat radiobutton group
+        self.ide_combo = ttk.Combobox(ide_select_frame)  # placeholder to reuse config function
+        self.ide_combo.pack_forget()
+
+        # Create flat-style toggle buttons for IDE selection
+        style.configure('IDE.TRadiobutton',
+                       background='#ffffff', foreground='#374151', font=('Microsoft YaHei', 10),
+                       relief='flat', padding=6)
+        style.map('IDE.TRadiobutton',
+                   foreground=[('active', '#4338ca'), ('selected', '#ffffff')],
+                   background=[('selected', '#4f46e5')])
+
+        # Create buttons and store for style updates
+        self.ide_buttons = []
+        ide_values = ["VS Code", "Cursor", "Windsurf"]
+        for ide in ide_values:
+            rb = tk.Radiobutton(ide_select_frame,
+                                 text=ide,
+                                 value=ide,
+                                 variable=self.ide_var,
+                                 command=self._on_ide_change,
+                                 font=('Microsoft YaHei', 10, 'bold'),
+                                 bg='#ffffff', fg='#374151',
+                                 activebackground='#e0e7ff', activeforeground='#374151',
+                                 selectcolor='#4f46e5',
+                                 indicatoron=0, bd=0, relief='flat', takefocus=False)
+            rb.pack(side='left', padx=10, pady=4, expand=True, fill='x')
+            self.ide_buttons.append(rb)
+
+        # Apply initial style
+        self._update_ide_button_styles()
 
         # Buttons container
         buttons_frame = tk.Frame(main_frame, bg='#f5f5f5')
@@ -677,10 +762,20 @@ class MainPage:
                 self._update_ui_texts()
                 break
 
+    def _update_ide_button_styles(self):
+        """Update IDE buttons colors based on selection"""
+        selected = self.ide_var.get()
+        for btn in getattr(self, 'ide_buttons', []):
+            if btn['value'] == selected:
+                btn.config(bg='#4f46e5', fg='#ffffff')
+            else:
+                btn.config(bg='#ffffff', fg='#374151')
+
     def _on_ide_change(self, event=None):
         """Handle IDE selection change"""
         selected_ide = self.ide_var.get()
         self.config_manager.set_last_selected_ide(selected_ide)
+        self._update_ide_button_styles()
 
     def _show_about(self):
         """Show about dialog"""
