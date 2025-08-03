@@ -1,8 +1,8 @@
 {
-  "language": "zh_CN",
+  "language": "en_US",
   "first_run": false,
   "window_geometry": "420x780",
-  "last_selected_ide": "JetBrains",
+  "last_selected_ide": "VS Code",
   "show_welcome": false,
   "show_about_on_startup": true,
   "theme": "default"

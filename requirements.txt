@@ -3,8 +3,8 @@ colorama>=0.4.4
 PyQt6>=6.4.0
 psutil>=5.8.0
 
-# Linux 系统额外依赖说明:
-# 如果在 Linux 上遇到 Qt 平台插件错误，请运行以下命令安装系统依赖:
+# Linux dependencies:
+# If you encounter Qt platform plugin errors on Linux, run the following commands to install system dependencies:
 # Ubuntu/Debian:
 #   sudo apt install libxcb-xinerama0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-shape0 libxcb-util1 libxcb-xkb1 libxkbcommon-x11-0
 # CentOS/RHEL/Fedora:
