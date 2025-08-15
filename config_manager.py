@@ -6,6 +6,7 @@ Handles user settings and configuration persistence.
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -14,8 +15,15 @@ class ConfigManager:
     """Manages user configuration and settings"""
     
     def __init__(self):
-        # 使用绝对路径确保跨平台兼容性
-        self.config_dir = Path(__file__).resolve().parent / "config"
+        # 处理PyInstaller打包后的资源路径
+        if getattr(sys, 'frozen', False):
+            # PyInstaller打包后的环境
+            base_path = Path(sys._MEIPASS)
+        else:
+            # 开发环境
+            base_path = Path(__file__).resolve().parent
+
+        self.config_dir = base_path / "config"
         self.config_file = self.config_dir / "settings.json"
         self.settings = {}
         

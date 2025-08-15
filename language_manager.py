@@ -6,6 +6,7 @@ Handles internationalization and language switching functionality.
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
 
@@ -32,8 +33,15 @@ class LanguageManager:
     
     def _load_languages(self):
         """Load all available language files"""
-        # 使用绝对路径确保跨平台兼容性
-        languages_dir = Path(__file__).resolve().parent / "languages"
+        # 处理PyInstaller打包后的资源路径
+        if getattr(sys, 'frozen', False):
+            # PyInstaller打包后的环境
+            base_path = Path(sys._MEIPASS)
+        else:
+            # 开发环境
+            base_path = Path(__file__).resolve().parent
+
+        languages_dir = base_path / "languages"
         
         for lang_code in self.available_languages.keys():
             lang_file = languages_dir / f"{lang_code}.json"
