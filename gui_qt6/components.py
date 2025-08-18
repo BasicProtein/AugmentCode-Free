@@ -5,12 +5,13 @@
 """
 
 from PyQt6.QtWidgets import (
-    QPushButton, QLabel, QFrame, QVBoxLayout, 
+    QPushButton, QLabel, QFrame, QVBoxLayout,
     QHBoxLayout, QWidget, QScrollArea
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QCursor
 from .font_manager import get_button_font, get_default_font, get_title_font
+from language_manager import get_text
 
 
 class ModernButton(QPushButton):
@@ -31,6 +32,8 @@ class ModernButton(QPushButton):
             self.setProperty("class", "secondary")
         elif self.button_type == "warning":
             self.setProperty("class", "warning")
+        elif self.button_type == "success":
+            self.setProperty("class", "success")
         
         # 设置最小尺寸
         self.setMinimumHeight(45)
@@ -121,7 +124,7 @@ class SectionFrame(QFrame):
                 background-color: #ffffff;
                 border: 1px solid #e5e7eb;
                 border-radius: 8px;
-                padding: 8px;
+                padding: 6px;
             }}
         """)
 
@@ -196,7 +199,7 @@ class LanguageSelector(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         
         # 语言标签
-        self.label = SecondaryLabel("语言:")
+        self.label = SecondaryLabel(get_text("app.language"))
         layout.addWidget(self.label)
         
         # 语言下拉框 - 将在主窗口中实现

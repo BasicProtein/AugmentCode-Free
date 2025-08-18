@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "release_date": "2025-08-13",
+  "title": "AugmentCode-Free v2.0.0 - 界面优化与多语言完善版",
+  "description": "完美多语言支持、布局优化、补丁功能集成",
+  "features": [
+    "🎨 完美多语言支持：所有界面元素支持中英文实时切换",
+    "📐 布局优化：窗口宽度增加至680px，按钮宽度全面提升",
+    "🔧 补丁功能集成：新增代码补丁应用、恢复、扫描功能",
+    "✨ 界面细节优化：清空日志按钮定位优化，垂直高度增加",
+    "🎯 用户体验提升：移除多余emoji，界面更简洁专业"
+  ],
+  "technical_improvements": [
+    "支持多种补丁模式：随机假数据、完全阻止、空数据、隐身模式、调试模式",
+    "所有按钮和文本在中英文模式下都能完美显示",
+    "解决显示截断问题，确保英文文本完整显示",
+    "优化代码结构，清理无效文件和测试代码"
+  ],
+  "compatibility": [
+    "支持 VS Code、Cursor、Windsurf、JetBrains 系列IDE",
+    "Windows 10/11 x64",
+    "Python 3.7+"
+  ],
+  "files": {
+    "source": "AugmentCode-Free-v2.0.0-Source.zip",
+    "executable": "AugmentCode-Free-v2.0.0.exe (构建中)",
+    "portable": "AugmentCode-Free-v2.0.0-Portable.zip (构建中)"
+  }
+}

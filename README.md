@@ -1,15 +1,11 @@
-# AugmentCode-Free v1.0.6
+# AugmentCode-Free v2.0.0 (Click the star，continuously updating and maintaining)
+**点个星标，持续更新维护中……**
 # Telegram Communication Group
 
 https://t.me/+rL2-my2wYy5hODA1
 ![0d0f761c0d09056358a24766f806802](https://github.com/user-attachments/assets/64c8cb5d-7989-4c8e-808b-0b72b6cc9cc8)
 
-AugmentCode无限免费续杯方案；新账号可获得600次免费的Claude Sonnet 4调用
 
-AugmentCode unlimited free refill plan; new accounts can get 600 free Claude Sonnet 4 calls
-
-## 使用工具后隔了半小时或者几个小时后封号，这种情况一般与网络环境也有关，与本工具无关，因为本项目原理无非是伪装成新用户无限合法使用
-## If the account is blocked half an hour or several hours after using the tool, this situation is generally related to the network environment and has nothing to do with this tool, because the principle of this project is nothing more than pretending to be a new user and using it legally indefinitely.
 
 
 
@@ -22,7 +18,87 @@ AugmentCode unlimited free refill plan; new accounts can get 600 free Claude Son
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/BasicProtein/AugmentCode-Free)
 
+#### 2025年8月14日更新 (v2.0.2)：
 
+**🔍 扩展文件扫描优化**：
+- **路径模式增强**：添加 `augment.vscode-augment-*` 等多种扩展名称模式，提升扫描成功率
+- **搜索策略改进**：当标准搜索失败时，自动启用关键词搜索作为备选方案
+- **文件验证优化**：支持识别压缩/混淆的扩展文件，基于文件路径进行智能判断
+- **调试信息增强**：添加详细的搜索过程日志，帮助定位扫描问题
+- **全IDE支持**：优化覆盖 VS Code、Cursor、Windsurf 等所有支持的IDE
+
+**🔍 Extension File Scanning Optimization**：
+- **Enhanced Path Patterns**: Added multiple extension name patterns like `augment.vscode-augment-*` to improve scan success rate
+- **Improved Search Strategy**: Automatically enables keyword search as fallback when standard search fails
+- **Optimized File Validation**: Supports recognition of compressed/obfuscated extension files with intelligent path-based judgment
+- **Enhanced Debug Information**: Added detailed search process logs to help locate scanning issues
+- **Full IDE Support**: Optimization covers all supported IDEs including VS Code, Cursor, Windsurf
+
+#### 2025年8月12日更新 (v2.0.0)：
+
+**🚀 重大功能升级 - 增强清理引擎**：
+- **强力进程管理**：智能检测和终止IDE进程，支持多种终止策略和重试机制
+- **高级文件清理**：物理文件删除功能，支持强制删除被锁定的文件
+- **多种清理模式**：
+  - `database_only`: 仅清理数据库内容，保留文件结构
+  - `file_only`: 仅删除物理文件，不修改数据库内容
+  - `hybrid`: 推荐模式，先清理数据库内容，再删除相关文件
+  - `aggressive`: 激进模式，强制终止进程并删除所有相关文件
+- **增强CLI命令**：新增 `clean-enhanced`, `check-processes`, `kill-processes`, `file-cleanup` 命令
+- **自动备份**：清理前自动创建数据库备份，确保数据安全
+- **详细统计**：显示删除的具体条目数、文件数和进程数
+- **完全向后兼容**：现有GUI界面保持不变，后端功能大幅增强
+
+#### Updated on August 12, 2025 (v2.0.0):
+
+**🔧 Major Feature Upgrade - Enhanced Cleanup Engine**：
+- **Powerful Process Management**: Intelligent IDE process detection and termination with multiple strategies
+- **Advanced File Cleanup**: Physical file deletion with force delete for locked files
+- **Multiple Cleanup Modes**: database_only, file_only, hybrid, and aggressive modes
+- **Enhanced CLI Commands**: New commands for comprehensive cleanup operations
+- **Automatic Backup**: Auto-backup database before cleanup for data safety
+- **Detailed Statistics**: Shows exact counts of deleted entries, files, and processes
+- **Full Backward Compatibility**: Existing GUI unchanged, backend significantly enhanced
+
+**🎨 界面优化与多语言完善**：
+- **完美多语言支持**：所有界面元素支持中英文实时切换，包括按钮、标签、下拉框选项
+- **布局优化**：窗口宽度增加至680px，按钮宽度全面提升，确保英文文本完整显示
+- **补丁功能集成**：新增代码补丁应用、恢复、扫描功能，支持多种补丁模式（随机假数据、完全阻止、空数据、隐身模式、调试模式）
+- **界面细节优化**：清空日志按钮定位优化，垂直高度增加，解决显示截断问题
+- **用户体验提升**：移除多余emoji，界面更简洁专业，所有按钮和文本在中英文模式下都能完美显示
+
+**🎨 Interface Optimization & Multilingual Enhancement**：
+- **Perfect Multilingual Support**: All interface elements support real-time Chinese-English switching, including buttons, labels, and dropdown options
+- **Layout Optimization**: Window width increased to 680px, button widths comprehensively enhanced to ensure complete English text display
+- **Patch Function Integration**: Added code patch application, restoration, and scanning features with multiple patch modes (random fake data, complete block, empty data, stealth mode, debug mode)
+- **Interface Detail Optimization**: Clear log button positioning optimized, vertical height increased, resolving display truncation issues
+- **User Experience Enhancement**: Removed redundant emojis for a cleaner, more professional interface; all buttons and text display perfectly in both Chinese and English modes
+
+#### 2025年8月5日更新：
+
+- 分享一个Augment魔改去风控版本，只要注册直接登录即可过风控直接使用，已经稳定二天半，具体核心原理就是去掉登录之后的上报接口。
+- [Augment-521.vsix.zip](https://sharewh.chaoxing.com/share/download/83b70fb33c370dee593e52475d10e8e6)
+- 作者@待我绝境涅槃
+- [详细的使用方法](https://github.com/agassiz/vscode-augment/blob/main/README.md)
+
+#### Updated on August 5, 2025:
+
+- I'd like to share a modified version of Augment that removes risk control. You can use it directly by simply registering and logging in, passing risk control. It has been stable for two and a half days. The core principle is to remove the reporting interface after login.
+- [Augment-521.vsix.zip](https://sharewh.chaoxing.com/share/download/83b70fb33c370dee593e52475d10e8e6)
+- Author@待我绝境涅槃
+-  [Detailed usage instructions](https://github.com/agassiz/vscode-augment/blob/main/README.md)
+-  [Installation Instructions (English version)](https://github.com/BasicProtein/AugmentCode-Free/blob/master/Installation-Method-EN.md)
+
+
+
+
+---
+AugmentCode无限免费续杯方案；新账号可获得600次免费的Claude Sonnet 4调用
+
+AugmentCode unlimited free refill plan; new accounts can get 600 free Claude Sonnet 4 calls
+
+## 使用工具后隔了半小时或者几个小时后封号，这种情况一般与网络环境也有关，与本工具无关，因为本项目原理无非是伪装成新用户无限合法使用
+## If the account is blocked half an hour or several hours after using the tool, this situation is generally related to the network environment and has nothing to do with this tool, because the principle of this project is nothing more than pretending to be a new user and using it legally indefinitely.
 
 #### 2025年8月1日更新：
 - 目前社区计划已经失效
@@ -39,7 +115,7 @@ AugmentCode unlimited free refill plan; new accounts can get 600 free Claude Son
 
 #### 2025年7月31日更新：
 - 目前比较稳定的计划是切换社区计划或者是通过Google的GCP或者Github Actions间接无限使用新账号
-- 参考YouTube视频[Google Cloud Platform](https://youtu.be/P2ADJdk5mYo?si=2NgH6qIHP7BBEUUf)
+- 详见YouTube视频[Google Cloud Platform](https://youtu.be/P2ADJdk5mYo?si=2NgH6qIHP7BBEUUf)
 
 
 **切换社区计划：**
@@ -302,7 +378,14 @@ Summary: The primary account can be any account, even if it is blocked. The prim
 ## Features
 
 ### Core Functionality (Available in CLI & GUI)
--   **Multi-IDE Database Cleaning**: Cleans specific entries from VS Code, Cursor, and Windsurf local databases.
+-   **Enhanced Database Cleaning**: Cleans specific entries from VS Code, Cursor, and Windsurf local databases with automatic backup and detailed statistics.
+-   **Powerful Process Management**: Intelligent IDE process detection and termination with multiple strategies and retry mechanisms.
+-   **Advanced File Cleanup**: Physical file deletion with force delete for locked files and recursive workspace storage cleanup.
+-   **Multiple Cleanup Modes**:
+    - `database_only`: Clean database content only, preserve file structure
+    - `file_only`: Delete physical files only, no database modification
+    - `hybrid`: Recommended mode, clean database first then delete related files
+    - `aggressive`: Force mode, terminate processes and delete all related files
 -   **Multi-IDE Telemetry ID Modification**: Helps in resetting or changing telemetry identifiers stored by supported IDEs.
 -   **JetBrains SessionID Management**: Automatically modifies SessionID for JetBrains products (PyCharm, IntelliJ IDEA, WebStorm, etc.).
 -   **Smart Process Detection**: Automatically detects and manages running IDE processes.
@@ -419,6 +502,23 @@ augment-tools run-all --ide vscode
 augment-tools run-all --ide cursor
 augment-tools run-all --ide windsurf
 augment-tools run-all --ide jetbrains
+
+# === v2.0.0 New Enhanced Commands ===
+
+# Enhanced cleanup (recommended hybrid mode)
+augment-tools clean-enhanced --ide vscode --mode hybrid
+
+# Aggressive cleanup (force kill processes + delete files)
+augment-tools clean-enhanced --ide vscode --mode aggressive --force --kill-processes
+
+# File cleanup only
+augment-tools file-cleanup --ide vscode --force
+
+# Check IDE processes
+augment-tools check-processes --ide vscode
+
+# Kill IDE processes
+augment-tools kill-processes --ide vscode --force
 ```
 
 -   **Directly (for development/advanced use, from project root):**
@@ -438,7 +538,14 @@ Use these tools at your own risk. Always back up important data before running m
 ## 功能特性
 
 ### 核心功能 (命令行及GUI均可用)
--   **多IDE数据库清理**: 清理 VS Code、Cursor、Windsurf 本地数据库中的特定条目。
+-   **增强数据库清理**: 清理 VS Code、Cursor、Windsurf 本地数据库中的特定条目，支持自动备份和详细统计。
+-   **强力进程管理**: 智能检测和终止IDE进程，支持多种终止策略和重试机制。
+-   **高级文件清理**: 物理文件删除功能，支持强制删除被锁定的文件和递归清理工作区存储。
+-   **多种清理模式**:
+    - `database_only`: 仅清理数据库内容，保留文件结构
+    - `file_only`: 仅删除物理文件，不修改数据库内容
+    - `hybrid`: 推荐模式，先清理数据库内容，再删除相关文件
+    - `aggressive`: 激进模式，强制终止进程并删除所有相关文件
 -   **多IDE遥测ID修改**: 帮助重置或更改支持的IDE存储的遥测标识符。
 -   **JetBrains SessionID管理**: 自动修改 JetBrains 系列产品的 SessionID（PyCharm、IntelliJ IDEA、WebStorm等）。
 -   **智能进程检测**: 自动检测和管理正在运行的IDE进程。
@@ -521,6 +628,23 @@ GUI 为所有功能提供了简单易用的操作界面。
 
     # 为 VS Code 运行所有工具
     augment-tools run-all --ide vscode
+
+    # === v2.0.0 新增增强命令 ===
+
+    # 增强清理 (推荐混合模式)
+    augment-tools clean-enhanced --ide vscode --mode hybrid
+
+    # 激进清理 (强制终止进程+删除文件)
+    augment-tools clean-enhanced --ide vscode --mode aggressive --force --kill-processes
+
+    # 仅文件清理
+    augment-tools file-cleanup --ide vscode --force
+
+    # 检查IDE进程
+    augment-tools check-processes --ide vscode
+
+    # 终止IDE进程
+    augment-tools kill-processes --ide vscode --force
     ```
 
 -   **直接运行 (用于开发/高级用户, 从项目根目录):**

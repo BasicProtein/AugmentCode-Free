@@ -78,9 +78,17 @@ def get_button_style() -> str:
     QPushButton.warning {{
         background-color: {COLORS['warning']};
     }}
-    
+
     QPushButton.warning:hover {{
         background-color: {COLORS['warning_hover']};
+    }}
+
+    QPushButton.success {{
+        background-color: {COLORS['success']};
+    }}
+
+    QPushButton.success:hover {{
+        background-color: #047857;
     }}
     """
 

@@ -37,7 +37,7 @@ import concurrent.futures
 from contextlib import contextmanager
 
 # Build Configuration
-VERSION = "1.0.6"
+VERSION = "2.0.2-路径优化版"
 PROJECT_NAME = "AugmentCode-Free"
 AUTHOR = "BasicProtein"
 DESCRIPTION = "多IDE维护工具包 - 支持VS Code、Cursor、Windsurf、JetBrains"
@@ -217,7 +217,7 @@ class BuildEnvironment:
         logger.info(f"Architecture: {self.platform_info['machine']}")
         
         # Check required files
-        required_files = ['setup.py', 'main.py', 'gui.py', 'requirements.txt']
+        required_files = ['setup.py', 'main.py', 'requirements.txt']
         missing_files = [f for f in required_files if not (self.build_dir / f).exists()]
         
         if missing_files:
@@ -514,7 +514,7 @@ class PortablePackageBuilder:
             portable_dir.mkdir()
 
             # Copy core files
-            core_files = ['main.py', 'gui.py', 'run_gui.py', 'setup.py',
+            core_files = ['main.py', 'setup.py',
                          'requirements.txt', 'README.md', '.gitignore']
 
             for file in core_files:

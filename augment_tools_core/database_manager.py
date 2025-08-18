@@ -256,3 +256,172 @@ if __name__ == '__main__':
         test_dummy_db_path.unlink()
     print_info("\nCleaned up dummy database files.")
     print_success("All database_manager tests completed.")
+
+# === 新增功能：集成清理策略 ===
+
+def clean_ide_database_enhanced(ide_type: IDEType, keyword: str = "augment") -> dict:
+    """
+    增强版数据库清理函数，返回详细统计信息
+
+    Args:
+        ide_type: IDE类型
+        keyword: 搜索关键字
+
+    Returns:
+        dict: 包含清理结果的详细信息
+    """
+    result = {
+        "success": False,
+        "entries_removed": 0,
+        "backup_created": False,
+        "error_message": None
+    }
+
+    ide_name = get_ide_display_name(ide_type)
+    print_info(f"开始增强清理 {ide_name} 数据库 (关键字: '{keyword}')")
+
+    # JetBrains 产品不需要数据库清理
+    if ide_type == IDEType.JETBRAINS:
+        print_info(f"{ide_name} 产品不需要数据库清理，跳过此步骤")
+        result["success"] = True
+        return result
+
+    paths = get_ide_paths(ide_type)
+    if not paths:
+        result["error_message"] = f"无法确定 {ide_name} 路径"
+        print_error(result["error_message"])
+        return result
+
+    db_path = paths.get("state_db")
+    if not db_path:
+        result["error_message"] = f"在配置中未找到 {ide_name} state.vscdb 路径"
+        print_error(result["error_message"])
+        return result
+
+    # 调用增强版清理函数
+    return clean_vscode_database_enhanced(db_path, keyword)
+
+def clean_vscode_database_enhanced(db_path: Path, keyword: str = "augment") -> dict:
+    """
+    增强版VSCode数据库清理函数，返回详细统计信息
+
+    Args:
+        db_path: 数据库文件路径
+        keyword: 搜索关键字
+
+    Returns:
+        dict: 包含清理结果的详细信息
+    """
+    result = {
+        "success": False,
+        "entries_removed": 0,
+        "backup_created": False,
+        "error_message": None
+    }
+
+    if not db_path.exists():
+        result["error_message"] = f"数据库文件未找到: {db_path}"
+        print_error(result["error_message"])
+        return result
+
+    try:
+        # 创建备份
+        backup_path = create_backup(db_path)
+        if backup_path:
+            result["backup_created"] = True
+            print_success(f"已创建备份: {backup_path}")
+
+        # 连接数据库并清理
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+
+            # 首先统计要删除的条目数
+            count_query = "SELECT COUNT(*) FROM ItemTable WHERE key LIKE ?"
+            cursor.execute(count_query, (f'%{keyword}%',))
+            count_result = cursor.fetchone()
+            entries_to_remove = count_result[0] if count_result else 0
+
+            if entries_to_remove == 0:
+                print_info(f"未找到包含关键字 '{keyword}' 的条目")
+                result["success"] = True
+                return result
+
+            print_info(f"找到 {entries_to_remove} 个包含关键字 '{keyword}' 的条目")
+
+            # 执行删除
+            delete_query = "DELETE FROM ItemTable WHERE key LIKE ?"
+            cursor.execute(delete_query, (f'%{keyword}%',))
+
+            # 提交更改
+            conn.commit()
+
+            result["entries_removed"] = entries_to_remove
+            result["success"] = True
+
+            print_success(f"成功删除 {entries_to_remove} 个条目")
+
+    except sqlite3.Error as e:
+        result["error_message"] = f"数据库操作失败: {e}"
+        print_error(result["error_message"])
+    except Exception as e:
+        result["error_message"] = f"清理过程中发生错误: {e}"
+        print_error(result["error_message"])
+
+    return result
+
+async def clean_ide_comprehensive(ide_type: IDEType,
+                                 mode: str = "hybrid",
+                                 keyword: str = "augment",
+                                 force_delete: bool = False,
+                                 kill_processes: bool = False) -> dict:
+    """
+    综合清理函数，整合数据库清理和文件删除
+
+    Args:
+        ide_type: IDE类型
+        mode: 清理模式 ("database_only", "file_only", "hybrid", "aggressive")
+        keyword: 搜索关键字
+        force_delete: 是否强制删除文件
+        kill_processes: 是否自动终止进程
+
+    Returns:
+        dict: 综合清理结果
+    """
+    # 导入清理策略模块
+    from .cleanup_strategies import CleanupStrategy, CleanupOptions, CleanupMode
+
+    # 转换模式字符串为枚举
+    mode_mapping = {
+        "database_only": CleanupMode.DATABASE_ONLY,
+        "file_only": CleanupMode.FILE_ONLY,
+        "hybrid": CleanupMode.HYBRID,
+        "aggressive": CleanupMode.AGGRESSIVE
+    }
+
+    cleanup_mode = mode_mapping.get(mode, CleanupMode.HYBRID)
+
+    # 创建清理选项
+    options = CleanupOptions(
+        mode=cleanup_mode,
+        keyword=keyword,
+        force_delete=force_delete,
+        kill_processes=kill_processes
+    )
+
+    # 执行清理
+    strategy = CleanupStrategy()
+    result = await strategy.execute_cleanup(ide_type, options)
+
+    # 转换结果格式以保持兼容性
+    return {
+        "success": len(result.errors) == 0,
+        "database_cleaned": result.database_cleaned,
+        "database_entries_removed": result.database_entries_removed,
+        "files_deleted": result.files_deleted,
+        "global_storage_files": result.global_storage_files,
+        "workspace_storage_files": result.workspace_storage_files,
+        "processes_killed": result.processes_killed,
+        "errors": result.errors,
+        "warnings": result.warnings,
+        "summary": result.get_summary()
+    }

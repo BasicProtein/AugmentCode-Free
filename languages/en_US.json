@@ -2,16 +2,38 @@
   "app": {
     "title": "AugmentCode-Free",
     "welcome": "Welcome",
-    "version": "v1.0.6 - Multi-IDE Support",
+    "version": "v2.0.3 - Internationalization Optimized Version",
     "select_ide": "Select IDE:",
     "language": "Language:",
-    "about": "About"
+    "about": "About",
+    "patch_mode": "Patch Mode:",
+    "code_patch": "Code Patch",
+    "operation_log": "Operation Log:",
+    "description": "AugmentCode-Free is an open-source and free IDE maintenance tool.",
+    "supported_ides": "Supported IDEs:",
+    "ide_list": "• VS Code\n• Cursor\n• Windsurf",
+    "main_features": "Main Features:",
+    "feature_list": "• Clean IDE Database\n• Modify Telemetry IDs\n• One-click Modify All",
+    "opensource_notice": "This project is completely open source and free!",
+    "warning_notice": "⚠️ Important Notice:\nThis project is completely open source and free! If someone charges you, please contact the seller immediately for a refund and report the fraud.",
+    "project_address": "Project Address:",
+    "dont_show_again": "Don't show this dialog on startup"
+  },
+  "patch_modes": {
+    "random": "Random Fake Data",
+    "block": "Complete Block",
+    "empty": "Empty Data",
+    "stealth": "Stealth Mode",
+    "debug": "Debug Mode"
   },
   "buttons": {
     "run_all": "Modify All Configurations",
     "close_ide": "Close Selected IDE",
-    "clean_db": "Clean IDE Database", 
+    "clean_db": "Clean IDE Database",
     "modify_ids": "Modify Telemetry IDs",
+    "apply_patch": "Apply Patch",
+    "restore_files": "Restore Files",
+    "scan_status": "Scan Status",
     "clear_log": "Clear Log",
     "ok": "OK",
     "cancel": "Cancel",
@@ -45,7 +67,7 @@
   "status": {
     "success": "✅ Operation Completed",
     "error": "❌ Operation Failed",
-    "warning": "⚠️ Warning", 
+    "warning": "⚠️ Warning",
     "processing": "ℹ️ Processing...",
     "ready": "Ready",
     "running": "Running modification...",
@@ -53,7 +75,8 @@
     "cleaning_db": "Cleaning database...",
     "modifying_ids": "Modifying telemetry IDs...",
     "completed": "✅ All tools execution completed",
-    "failed": "❌ Tools execution failed"
+    "failed": "❌ Tools execution failed",
+    "not_scanned": "Status: Not Scanned"
   },
   "copyright": {
     "notice": "© 2025 BasicProtein. All rights reserved.",
@@ -92,5 +115,104 @@
     "proceeding": "Proceeding to the next step despite the error.",
     "all_finished": "All tools for {ide_name} have finished their execution sequence.",
     "unsupported_ide": "Unsupported IDE: {ide}. Supported: vscode, cursor, windsurf, jetbrains"
+  },
+  "workers": {
+    "close_ide": {
+      "closing": "Closing {ide_name}...",
+      "closed_process": "Closed {process_name} (PID: {pid})",
+      "close_failed": "Failed to close process: {error}",
+      "success": "{ide_name} closed successfully",
+      "not_found": "No running {ide_name} processes found",
+      "error": "Error occurred while closing {ide_name}: {error}"
+    },
+    "clean_db": {
+      "starting": "Starting to clean {ide_name} database (keyword: '{keyword}')",
+      "cleaning": "Cleaning {ide_name} database...",
+      "entries_removed": "Successfully removed {count} entries containing keyword",
+      "no_entries": "No entries found to clean",
+      "backup_created": "Database backup created automatically",
+      "completed": "Database cleaning process completed.",
+      "failed": "Database cleaning failed: {error}",
+      "error": "Error occurred while cleaning database: {error}"
+    },
+    "modify_ids": {
+      "starting": "Starting to modify {ide_name} telemetry IDs",
+      "modifying": "Modifying {ide_name} telemetry IDs...",
+      "completed": "Telemetry ID modification process completed.",
+      "failed": "Telemetry ID modification process reported errors. Check previous messages.",
+      "error": "Error occurred while modifying telemetry IDs: {error}"
+    },
+    "run_all": {
+      "starting": "Starting to execute all tools for {ide_name}",
+      "running": "Executing one-click modification...",
+      "step_close": "Step 1: Close {ide_name}",
+      "step_clean": "Step 2: Clean {ide_name} database",
+      "step_modify": "Step 3: Modify {ide_name} telemetry IDs",
+      "db_completed": "Database cleaning completed",
+      "db_failed": "Database cleaning failed",
+      "ids_completed": "Telemetry ID modification completed",
+      "ids_failed": "Telemetry ID modification failed",
+      "all_completed": "All tools for {ide_name} have completed their execution sequence.",
+      "partial_failed": "Some tools for {ide_name} failed to execute.",
+      "error": "Error occurred while running all tools: {error}"
+    },
+    "enhanced_cleanup": {
+      "starting": "Starting enhanced cleanup for {ide_name} (mode: {mode})",
+      "running": "Executing enhanced cleanup...",
+      "results": "Cleanup results:",
+      "db_cleaned": "  Database cleanup: removed {count} entries",
+      "files_deleted": "  File deletion: {count} files",
+      "global_storage": "    - globalStorage: {count} files",
+      "workspace_storage": "    - workspaceStorage: {count} files",
+      "processes_killed": "  Process termination: {count} processes",
+      "completed": "Enhanced cleanup completed.",
+      "failed": "Enhanced cleanup failed",
+      "error": "Error occurred during enhanced cleanup: {error}"
+    },
+    "process_manager": {
+      "checking": "Checking {ide_name} processes...",
+      "found_processes": "Found {count} {ide_name} processes:",
+      "no_processes": "No {ide_name} processes found",
+      "killing": "Terminating {ide_name} processes...",
+      "all_killed": "All processes terminated successfully",
+      "partial_killed": "Some processes may not have been terminated",
+      "error": "Error occurred during process management: {error}"
+    }
+  },
+  "patch": {
+    "searching": "🔍 Searching for extension files...",
+    "not_found": "No extension files found for {ide_type}",
+    "found_files": "📁 Found {count} extension files",
+    "processing": "🔧 Processing file {current}/{total}: {file}",
+    "already_patched": "⏭️ File already patched, skipping: {file}",
+    "patch_success": "✅ Patch successful: {file}",
+    "patch_failed": "❌ Patch failed: {message}",
+    "completed": "Patch operation completed! Successfully processed {success}/{total} files",
+    "no_success": "No files were successfully patched",
+    "error": "Patch operation failed: {error}",
+    "restoring": "🔄 Restoring file {current}/{total}: {file}",
+    "restore_success": "✅ Restore successful: {file}",
+    "restore_skipped": "⚠️ Restore skipped: {message}",
+    "restore_completed": "Restore operation completed! Successfully restored {success}/{total} files",
+    "restore_no_success": "No files needed restoration or restoration failed",
+    "restore_error": "Restore operation failed: {error}",
+    "scanning": "🔍 Starting to scan extension files for all IDEs...",
+    "scanning_ide": "📂 Scanning {ide_type}...",
+    "scan_completed": "✅ {ide_type} scan completed, found {count} files",
+    "scan_finished": "🎉 Scan completed!",
+    "scan_error": "Scan failed: {error}",
+    "batch_starting": "🚀 Starting batch patch operation...",
+    "batch_processing": "🔧 Processing {ide_type} ({current}/{total})...",
+    "batch_no_files": "No extension files found",
+    "batch_success": "Successfully patched {success}/{total} files",
+    "batch_completed": "Batch patch completed! Successfully processed {count} IDEs",
+    "batch_partial": "Batch patch partially successful, check detailed results",
+    "batch_error": "Batch patch failed: {error}",
+    "status": {
+      "patched": "Patched",
+      "not_patched": "Not Patched",
+      "file_not_found": "File Not Found",
+      "status_unknown": "Status Unknown"
+    }
   }
 }

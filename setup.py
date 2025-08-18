@@ -13,7 +13,7 @@ def parse_requirements(filename="requirements.txt"):
 
 setup(
     name="augment-tools-core",
-    version="1.0.6",
+    version="2.0.0",
     author="BasicProtein", # 您可以修改为您的名字
     author_email="your.email@example.com", # 您可以修改为您的邮箱
     description="Core tools for VS Code maintenance, inspired by augment-vip.",

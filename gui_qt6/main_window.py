@@ -58,11 +58,12 @@ class MainWindow(QMainWindow):
             parts = geometry.replace('+', 'x').split('x')
             if len(parts) >= 2:
                 width, height = int(parts[0]), int(parts[1])
-                # 确保最小高度为780px（减少了70px）
+                # 确保最小尺寸：宽度680px，高度780px
+                width = max(width, 680)  # 确保最小宽度
                 height = max(height, 780)
                 self.resize(width, height)
         else:
-            self.resize(520, 780)  # 减少高度，因为节省了垂直空间
+            self.resize(680, 780)  # 大幅增加宽度以容纳更宽的按钮
         
         # 禁用窗口大小调整
         self.setFixedSize(self.size())

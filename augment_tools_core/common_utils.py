@@ -148,7 +148,7 @@ def detect_windsurf_paths() -> Dict[str, Path]:
     home = Path.home()
     system = platform.system()
 
-    # 构建标准路径（参考项目的方式）
+    # 构建标准路径
     if system == "Windows":
         appdata = os.environ.get("APPDATA")
         if appdata:
@@ -354,3 +354,186 @@ if __name__ == '__main__':
     print_warning("This is a warning message.")
     print_error("This is an error message.")
     print_info("common_utils.py tests complete.")
+
+# === 新增功能：进程和文件管理工具函数 ===
+
+def is_process_running(process_name: str) -> bool:
+    """
+    检查指定名称的进程是否在运行
+
+    Args:
+        process_name: 进程名称
+
+    Returns:
+        bool: 是否在运行
+    """
+    try:
+        import subprocess
+        import platform
+
+        system = platform.system()
+        if system == "Windows":
+            cmd = f'tasklist /FI "IMAGENAME eq {process_name}" /FO CSV'
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding='gbk', errors='ignore')
+            return process_name.lower() in result.stdout.lower()
+        else:
+            search_pattern = process_name.replace('.exe', '')
+            cmd = f'pgrep -f "{search_pattern}"'
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            return result.returncode == 0
+    except Exception:
+        return False
+
+def get_file_size_mb(file_path: Path) -> float:
+    """
+    获取文件大小（MB）
+
+    Args:
+        file_path: 文件路径
+
+    Returns:
+        float: 文件大小（MB），如果文件不存在返回0
+    """
+    try:
+        if file_path.exists():
+            size_bytes = file_path.stat().st_size
+            return size_bytes / (1024 * 1024)
+        return 0.0
+    except Exception:
+        return 0.0
+
+def format_file_size(size_bytes: int) -> str:
+    """
+    格式化文件大小显示
+
+    Args:
+        size_bytes: 字节数
+
+    Returns:
+        str: 格式化的大小字符串
+    """
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    elif size_bytes < 1024 * 1024 * 1024:
+        return f"{size_bytes / (1024 * 1024):.1f} MB"
+    else:
+        return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
+
+def safe_remove_file(file_path: Path, max_retries: int = 3) -> bool:
+    """
+    安全删除文件（带重试）
+
+    Args:
+        file_path: 文件路径
+        max_retries: 最大重试次数
+
+    Returns:
+        bool: 是否成功删除
+    """
+    import time
+
+    if not file_path.exists():
+        return True
+
+    for attempt in range(max_retries):
+        try:
+            file_path.unlink()
+            return True
+        except (PermissionError, OSError) as e:
+            if attempt < max_retries - 1:
+                print_warning(f"删除文件失败，重试中... ({attempt + 1}/{max_retries})")
+                time.sleep(1)
+            else:
+                print_error(f"删除文件失败: {file_path} - {e}")
+                return False
+        except Exception as e:
+            print_error(f"删除文件时发生意外错误: {file_path} - {e}")
+            return False
+
+    return False
+
+def get_cleanup_mode_display_name(mode: str) -> str:
+    """
+    获取清理模式的显示名称
+
+    Args:
+        mode: 清理模式字符串
+
+    Returns:
+        str: 显示名称
+    """
+    mode_names = {
+        "database_only": "仅数据库清理",
+        "file_only": "仅文件删除",
+        "hybrid": "混合模式",
+        "aggressive": "激进模式"
+    }
+    return mode_names.get(mode, mode)
+
+def validate_cleanup_options(mode: str, ide_type: IDEType) -> tuple[bool, str]:
+    """
+    验证清理选项的有效性
+
+    Args:
+        mode: 清理模式
+        ide_type: IDE类型
+
+    Returns:
+        tuple[bool, str]: (是否有效, 错误信息)
+    """
+    valid_modes = ["database_only", "file_only", "hybrid", "aggressive"]
+
+    if mode not in valid_modes:
+        return False, f"无效的清理模式: {mode}。有效模式: {', '.join(valid_modes)}"
+
+    # JetBrains产品只支持特定模式
+    if ide_type == IDEType.JETBRAINS and mode in ["file_only", "aggressive"]:
+        return False, f"JetBrains产品不支持 {mode} 模式"
+
+    return True, ""
+
+def get_ide_process_names(ide_type: IDEType) -> list[str]:
+    """
+    获取IDE的进程名称列表
+
+    Args:
+        ide_type: IDE类型
+
+    Returns:
+        list[str]: 进程名称列表
+    """
+    process_names = {
+        IDEType.VSCODE: ['Code.exe', 'Code - Insiders.exe', 'Code - OSS.exe'],
+        IDEType.CURSOR: ['Cursor.exe', 'cursor.exe'],
+        IDEType.WINDSURF: ['Windsurf.exe', 'windsurf.exe'],
+        IDEType.JETBRAINS: [
+            'idea64.exe', 'idea.exe', 'pycharm64.exe', 'pycharm.exe',
+            'webstorm64.exe', 'webstorm.exe', 'phpstorm64.exe', 'phpstorm.exe'
+        ]
+    }
+    return process_names.get(ide_type, [])
+
+
+# --- Patch Related Functions ---
+def get_ide_extension_name(ide_type: IDEType) -> str:
+    """Get the extension name pattern for the specified IDE"""
+    extension_names = {
+        IDEType.VSCODE: "augment.vscode-augment",
+        IDEType.CURSOR: "augment.cursor-augment",
+        IDEType.WINDSURF: "augment.windsurf-augment",
+        IDEType.JETBRAINS: "augment.jetbrains-augment"
+    }
+    return extension_names.get(ide_type, "augment")
+
+
+def get_patch_target_description(ide_type: IDEType) -> str:
+    """Get description of what will be patched for the IDE"""
+    descriptions = {
+        IDEType.VSCODE: "VS Code AugmentCode 扩展文件",
+        IDEType.CURSOR: "Cursor AugmentCode 扩展文件",
+        IDEType.WINDSURF: "Windsurf AugmentCode 扩展文件",
+        IDEType.JETBRAINS: "JetBrains AugmentCode 插件文件"
+    }
+    return descriptions.get(ide_type, f"{ide_type.value} 扩展文件")

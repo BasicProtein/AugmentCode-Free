@@ -23,15 +23,13 @@ class AboutDialog(QDialog):
         super().__init__(parent)
         self.config_manager = config_manager
         self.show_dont_show_again = show_dont_show_again
-        
+
         self._setup_dialog()
         self._setup_ui()
         self._connect_signals()
 
-        # 强制刷新布局，确保所有组件正确显示
-        self.adjustSize()
-        self.updateGeometry()
-        self.update()
+        # 立即完成所有布局计算
+        self._finalize_layout()
     
     def _setup_dialog(self):
         """设置对话框属性"""
@@ -49,8 +47,8 @@ class AboutDialog(QDialog):
     def _setup_ui(self):
         """设置用户界面"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 25, 25, 25)  # 增加边距
-        layout.setSpacing(18)  # 增加间距
+        layout.setContentsMargins(20, 20, 20, 20)  # 适中边距
+        layout.setSpacing(12)  # 适中间距
         
         # 标题
         title_label = QLabel(get_text("app.title"))
@@ -74,8 +72,7 @@ class AboutDialog(QDialog):
         layout.addWidget(line)
         
         # 描述信息
-        desc_text = "AugmentCode-Free 是一个开源免费的IDE维护工具。"
-        desc_label = QLabel(desc_text)
+        desc_label = QLabel(get_text("app.description"))
         desc_label.setFont(get_default_font(10))
         desc_label.setWordWrap(True)
         desc_label.setStyleSheet("color: #374151; margin: 8px 0px;")
@@ -84,50 +81,55 @@ class AboutDialog(QDialog):
 
         # 创建并列布局：支持的IDE和主要功能
         features_layout = QHBoxLayout()
-        features_layout.setSpacing(20)
+        features_layout.setSpacing(15)
+        features_layout.setContentsMargins(0, 5, 0, 5)
 
         # 左侧：支持的IDE
         ide_frame = QFrame()
+        ide_frame.setMinimumHeight(90)
         ide_frame.setStyleSheet("""
             QFrame {
                 background-color: #f8fafc;
                 border: 1px solid #e2e8f0;
                 border-radius: 8px;
-                padding: 12px;
+                padding: 10px;
             }
         """)
         ide_layout = QVBoxLayout(ide_frame)
+        ide_layout.setContentsMargins(8, 12, 8, 12)
         ide_layout.setSpacing(8)
 
-        ide_title = QLabel("支持的IDE:")
+        ide_title = QLabel(get_text("app.supported_ides"))
         ide_title.setFont(get_default_font(10, bold=True))
         ide_title.setStyleSheet("color: #374151 !important; margin-bottom: 5px; background: transparent;")
         ide_layout.addWidget(ide_title)
 
-        ide_list = QLabel("• VS Code\n• Cursor\n• Windsurf")
+        ide_list = QLabel(get_text("app.ide_list"))
         ide_list.setFont(get_default_font(9))
         ide_list.setStyleSheet("color: #4b5563 !important; line-height: 1.5; background: transparent;")
         ide_layout.addWidget(ide_list)
 
         # 右侧：主要功能
         func_frame = QFrame()
+        func_frame.setMinimumHeight(90)
         func_frame.setStyleSheet("""
             QFrame {
                 background-color: #f8fafc;
                 border: 1px solid #e2e8f0;
                 border-radius: 8px;
-                padding: 12px;
+                padding: 10px;
             }
         """)
         func_layout = QVBoxLayout(func_frame)
+        func_layout.setContentsMargins(8, 12, 8, 12)
         func_layout.setSpacing(8)
 
-        func_title = QLabel("主要功能:")
+        func_title = QLabel(get_text("app.main_features"))
         func_title.setFont(get_default_font(10, bold=True))
         func_title.setStyleSheet("color: #374151 !important; margin-bottom: 5px; background: transparent;")
         func_layout.addWidget(func_title)
 
-        func_list = QLabel("• 清理IDE数据库\n• 修改遥测ID\n• 一键修改所有配置")
+        func_list = QLabel(get_text("app.feature_list"))
         func_list.setFont(get_default_font(9))
         func_list.setStyleSheet("color: #4b5563 !important; line-height: 1.5; background: transparent;")
         func_layout.addWidget(func_list)
@@ -138,7 +140,7 @@ class AboutDialog(QDialog):
         layout.addLayout(features_layout)
 
         # 添加开源声明
-        opensource_label = QLabel("本项目完全开源免费！")
+        opensource_label = QLabel(get_text("app.opensource_notice"))
         opensource_label.setFont(get_default_font(10, bold=True))
         opensource_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         opensource_label.setStyleSheet("color: #059669; margin: 10px 0px;")
@@ -158,8 +160,7 @@ class AboutDialog(QDialog):
         warning_layout = QVBoxLayout(warning_frame)
         warning_layout.setContentsMargins(8, 8, 8, 8)  # 减小内边距
 
-        warning_text = "⚠️ 重要提示：\n本项目完全开源免费！如果有人向您收费，请立即联系销售方退款并举报诈骗行为。"
-        warning_label = QLabel(warning_text)
+        warning_label = QLabel(get_text("app.warning_notice"))
         warning_label.setFont(get_default_font(8))  # 减小字体
         warning_label.setStyleSheet("color: #92400e; line-height: 1.3;")
         warning_label.setWordWrap(True)
@@ -171,7 +172,7 @@ class AboutDialog(QDialog):
         github_layout = QHBoxLayout()
         github_layout.addStretch()
 
-        github_label = QLabel("项目地址：")
+        github_label = QLabel(get_text("app.project_address"))
         github_label.setFont(get_default_font(9))  # 减小字体
         github_label.setStyleSheet("color: #6b7280; margin: 5px 0px;")
         github_layout.addWidget(github_label)
@@ -198,7 +199,7 @@ class AboutDialog(QDialog):
 
         # "启动时不再显示"选项
         if self.show_dont_show_again:
-            self.dont_show_checkbox = QCheckBox("启动时不再显示此对话框")
+            self.dont_show_checkbox = QCheckBox(get_text("app.dont_show_again"))
             self.dont_show_checkbox.setFont(get_default_font(8))  # 减小字体
             self.dont_show_checkbox.setStyleSheet("color: #6b7280; margin: 5px 0px;")
             bottom_layout.addWidget(self.dont_show_checkbox)
@@ -234,14 +235,26 @@ class AboutDialog(QDialog):
 
         layout.addLayout(bottom_layout)
 
-        # 强制刷新所有组件，确保文字正确显示
+    def _finalize_layout(self):
+        """完成布局设置，确保内容立即可见"""
+        # 强制布局系统立即计算所有组件
+        self.layout().activate()
+
+        # 设置所有标签为可见
+        for label in self.findChildren(QLabel):
+            label.setVisible(True)
+            label.show()
+
+        # 设置所有框架为可见
+        for frame in self.findChildren(QFrame):
+            frame.setVisible(True)
+            frame.show()
+
+        # 重新计算布局并调整大小
         self.layout().update()
-        for child in self.findChildren(QLabel):
-            child.adjustSize()
-            child.update()
-        for child in self.findChildren(QFrame):
-            child.update()
-    
+        self.adjustSize()
+        self.setVisible(True)
+
     def _connect_signals(self):
         """连接信号"""
         self.github_link.mousePressEvent = self._open_github
@@ -266,15 +279,6 @@ class AboutDialog(QDialog):
     
     def show(self):
         """显示对话框"""
-        # 强制刷新布局和重绘
-        self.updateGeometry()
-        self.update()
-        self.repaint()
-
-        # 确保所有子组件也更新
-        for child in self.findChildren(QLabel):
-            child.updateGeometry()
-            child.update()
-            child.repaint()
-
+        # 确保所有组件都可见
+        self._finalize_layout()
         return self.exec()

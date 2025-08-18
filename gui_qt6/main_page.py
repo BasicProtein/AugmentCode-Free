@@ -18,10 +18,12 @@ from .components import (
     ModernButton, StatusLabel, SectionFrame
 )
 from .workers import CloseIDEWorker, CleanDatabaseWorker, ModifyIDsWorker, RunAllWorker
+from .patch_worker import PatchWorker, RestoreWorker, ScanWorker
 from .font_manager import get_default_font, get_monospace_font
 from augment_tools_core.common_utils import (
     IDEType, get_ide_display_name, get_ide_process_names
 )
+from augment_tools_core.patch_manager import PatchMode
 from language_manager import get_language_manager, get_text
 from .about_dialog import AboutDialog
 
@@ -50,8 +52,8 @@ class MainPage(QWidget):
         """设置用户界面"""
         # 主布局
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(25, 15, 25, 15)  # 减少边距
-        main_layout.setSpacing(15)  # 减少间距
+        main_layout.setContentsMargins(30, 10, 30, 10)  # 减少上下边距
+        main_layout.setSpacing(8)  # 减少间距使布局更紧凑
         
         # 顶部栏
         self._create_top_bar(main_layout)
@@ -128,50 +130,149 @@ class MainPage(QWidget):
         # IDE选择标签
         self.ide_label = SubtitleLabel(get_text("app.select_ide"))
         parent_layout.addWidget(self.ide_label)
-        
-        # IDE选择框架
+
+        # IDE选择框架 - 使用水平布局
         ide_frame = SectionFrame()
-        ide_layout = QVBoxLayout(ide_frame)
-        
-        # IDE下拉框
+        ide_layout = QHBoxLayout(ide_frame)
+        ide_layout.setSpacing(25)  # 增加间距从15到25
+        ide_layout.setContentsMargins(15, 8, 15, 8)  # 减少内边距
+
+        # IDE下拉框 - 适当调整宽度
         self.ide_combo = QComboBox()
         self.ide_combo.setFont(get_default_font(10))
         self.ide_combo.addItems(["VS Code", "Cursor", "Windsurf", "JetBrains"])
+        self.ide_combo.setMaximumWidth(160)  # 稍微增加宽度
+        self.ide_combo.setMinimumWidth(140)
 
         # 设置上次选择的IDE
         last_ide = self.config_manager.get_last_selected_ide()
         if last_ide in ["VS Code", "Cursor", "Windsurf", "JetBrains"]:
             self.ide_combo.setCurrentText(last_ide)
-        
+
         ide_layout.addWidget(self.ide_combo)
+
+        # 添加一些弹性空间
+        ide_layout.addSpacing(20)
+
+        # 补丁模式选择 - 放在同一行
+        self.patch_mode_label = SecondaryLabel(get_text("app.patch_mode"))
+        ide_layout.addWidget(self.patch_mode_label)
+
+        self.patch_mode_combo = QComboBox()
+        self.patch_mode_combo.setFont(get_default_font(9))
+        self._update_patch_mode_combo()  # 使用多语言文本
+        self.patch_mode_combo.setMaximumWidth(150)  # 增加宽度以适应英文
+        ide_layout.addWidget(self.patch_mode_combo)
+
+        ide_layout.addStretch()  # 添加弹性空间
         parent_layout.addWidget(ide_frame)
-    
+
+    def _update_patch_mode_combo(self):
+        """更新补丁模式下拉框的多语言文本"""
+        current_index = self.patch_mode_combo.currentIndex() if hasattr(self, 'patch_mode_combo') else 0
+
+        # 清空并重新添加多语言文本
+        self.patch_mode_combo.clear()
+        self.patch_mode_combo.addItems([
+            get_text("patch_modes.random"),
+            get_text("patch_modes.block"),
+            get_text("patch_modes.empty"),
+            get_text("patch_modes.stealth"),
+            get_text("patch_modes.debug")
+        ])
+
+        # 恢复之前的选择
+        if current_index < self.patch_mode_combo.count():
+            self.patch_mode_combo.setCurrentIndex(current_index)
+
     def _create_buttons_section(self, parent_layout):
         """创建按钮区域"""
-        # 一键修改按钮
+        # 主要操作按钮
         self.run_all_btn = ModernButton(get_text("buttons.run_all"), "primary")
+        self.run_all_btn.setMaximumHeight(40)  # 减少高度使布局更紧凑
         parent_layout.addWidget(self.run_all_btn)
-        
+
+        # 基础工具按钮组 - 使用水平布局
+        basic_tools_frame = SectionFrame()
+        basic_tools_layout = QHBoxLayout(basic_tools_frame)
+        basic_tools_layout.setSpacing(15)  # 增加间距从10到15
+        basic_tools_layout.setContentsMargins(10, 4, 10, 4)  # 进一步减少内边距
+
         # 关闭IDE按钮
         self.close_ide_btn = ModernButton(get_text("buttons.close_ide"), "warning")
-        parent_layout.addWidget(self.close_ide_btn)
-        
+        self.close_ide_btn.setMaximumHeight(35)  # 减少高度使布局更紧凑
+        self.close_ide_btn.setMinimumWidth(180)  # 大幅增加最小宽度以适应英文
+        basic_tools_layout.addWidget(self.close_ide_btn)
+
         # 清理数据库按钮
         self.clean_db_btn = ModernButton(get_text("buttons.clean_db"), "secondary")
-        parent_layout.addWidget(self.clean_db_btn)
-        
+        self.clean_db_btn.setMaximumHeight(35)
+        self.clean_db_btn.setMinimumWidth(180)  # 大幅增加最小宽度以适应英文
+        basic_tools_layout.addWidget(self.clean_db_btn)
+
         # 修改遥测ID按钮
         self.modify_ids_btn = ModernButton(get_text("buttons.modify_ids"), "secondary")
-        parent_layout.addWidget(self.modify_ids_btn)
-    
+        self.modify_ids_btn.setMaximumHeight(35)
+        self.modify_ids_btn.setMinimumWidth(180)  # 大幅增加最小宽度以适应英文
+        basic_tools_layout.addWidget(self.modify_ids_btn)
+
+        parent_layout.addWidget(basic_tools_frame)
+
+        # 代码补丁区域
+        self._create_patch_section(parent_layout)
+
+    def _create_patch_section(self, parent_layout):
+        """创建代码补丁区域"""
+        # 补丁区域标题
+        self.patch_title_label = SubtitleLabel(get_text("app.code_patch"))
+        parent_layout.addWidget(self.patch_title_label)
+
+        # 补丁框架
+        patch_frame = SectionFrame()
+        patch_layout = QVBoxLayout(patch_frame)
+        patch_layout.setSpacing(8)  # 减少间距
+
+        # 补丁按钮组 - 优化布局
+        patch_btn_layout = QHBoxLayout()
+        patch_btn_layout.setSpacing(12)  # 增加间距
+        patch_btn_layout.setContentsMargins(5, 0, 5, 0)  # 添加左右边距
+
+        # 应用补丁按钮
+        self.apply_patch_btn = ModernButton(get_text("buttons.apply_patch"), "success")
+        self.apply_patch_btn.setMaximumHeight(35)  # 减少高度使布局更紧凑
+        self.apply_patch_btn.setMinimumWidth(150)  # 大幅增加最小宽度以适应英文
+        patch_btn_layout.addWidget(self.apply_patch_btn)
+
+        # 恢复原始文件按钮
+        self.restore_patch_btn = ModernButton(get_text("buttons.restore_files"), "warning")
+        self.restore_patch_btn.setMaximumHeight(35)
+        self.restore_patch_btn.setMinimumWidth(150)  # 大幅增加最小宽度以适应英文
+        patch_btn_layout.addWidget(self.restore_patch_btn)
+
+        # 扫描状态按钮
+        self.scan_patch_btn = ModernButton(get_text("buttons.scan_status"), "secondary")
+        self.scan_patch_btn.setMaximumHeight(35)
+        self.scan_patch_btn.setMinimumWidth(150)  # 大幅增加最小宽度以适应英文
+        patch_btn_layout.addWidget(self.scan_patch_btn)
+
+        patch_layout.addLayout(patch_btn_layout)
+
+        # 补丁状态显示
+        self.patch_status_label = SecondaryLabel(get_text("status.not_scanned"))
+        self.patch_status_label.setStyleSheet("color: #6b7280; font-style: italic; font-size: 10px;")
+        patch_layout.addWidget(self.patch_status_label)
+
+        parent_layout.addWidget(patch_frame)
+
     def _create_log_section(self, parent_layout):
         """创建日志区域"""
-        log_label = SubtitleLabel("操作日志:")
-        parent_layout.addWidget(log_label)
+        self.log_label = SubtitleLabel(get_text("app.operation_log"))
+        parent_layout.addWidget(self.log_label)
 
         # 创建日志容器
         log_container = QFrame()
-        log_container.setMaximumHeight(100)  # 减少高度以节省垂直空间
+        log_container.setMaximumHeight(130)  # 为更高的按钮进一步增加容器高度
+        log_container.setMinimumHeight(110)  # 增加最小高度
         log_container.setStyleSheet("QFrame { border: 1px solid #e2e8f0; border-radius: 6px; }")
 
         # 日志文本框
@@ -185,19 +286,19 @@ class MainPage(QWidget):
         self.clear_log_btn.setParent(log_container)
         # 根据语言调整按钮宽度
         if self.config_manager.get_language() == "en_US":
-            btn_width = 120  # 英文版本增加宽度
+            btn_width = 160  # 英文版本大幅增加宽度
         else:
-            btn_width = 100  # 中文版本保持原宽度
+            btn_width = 140  # 中文版本也大幅增加宽度
 
-        self.clear_log_btn.setFixedSize(btn_width, 25)
+        self.clear_log_btn.setFixedSize(btn_width, 36)  # 进一步增加按钮高度确保文字完全显示
 
         # 重写容器的resizeEvent来定位按钮
         def resize_log_container(event):
-            # 调整日志文本框大小
-            self.log_text.setGeometry(5, 5, event.size().width() - 10, event.size().height() - 10)
-            # 将按钮定位到右下角
+            # 调整日志文本框大小，为按钮留出更多空间
+            self.log_text.setGeometry(5, 5, event.size().width() - btn_width - 25, event.size().height() - 15)
+            # 将按钮定位到右下角，确保有足够的垂直空间
             btn_x = event.size().width() - btn_width - 10
-            btn_y = event.size().height() - 30
+            btn_y = event.size().height() - 44  # 为更高的按钮增加Y位置偏移，确保按钮完全可见
             self.clear_log_btn.move(btn_x, btn_y)
             self.clear_log_btn.raise_()  # 确保按钮在最上层
 
@@ -255,7 +356,12 @@ class MainPage(QWidget):
         self.clean_db_btn.clicked.connect(self._clean_database_clicked)
         self.modify_ids_btn.clicked.connect(self._modify_ids_clicked)
         self.clear_log_btn.clicked.connect(self._clear_log)
-        
+
+        # 补丁按钮
+        self.apply_patch_btn.clicked.connect(self._apply_patch_clicked)
+        self.restore_patch_btn.clicked.connect(self._restore_patch_clicked)
+        self.scan_patch_btn.clicked.connect(self._scan_patch_clicked)
+
         # GitHub链接
         self.github_link.clicked.connect(self._open_github)
 
@@ -284,25 +390,37 @@ class MainPage(QWidget):
         self.close_ide_btn.setText(get_text("buttons.close_ide"))
         self.clean_db_btn.setText(get_text("buttons.clean_db"))
         self.modify_ids_btn.setText(get_text("buttons.modify_ids"))
+        self.apply_patch_btn.setText(get_text("buttons.apply_patch"))
+        self.restore_patch_btn.setText(get_text("buttons.restore_files"))
+        self.scan_patch_btn.setText(get_text("buttons.scan_status"))
         self.clear_log_btn.setText(get_text("buttons.clear_log"))
         self.about_btn.setText(get_text("app.about"))
+
+        # 更新补丁模式下拉框
+        self._update_patch_mode_combo()
+
+        # 更新状态标签
+        self.patch_status_label.setText(get_text("status.not_scanned"))
 
         # 根据语言调整按钮宽度
         if self.config_manager.get_language() == "en_US":
             self.about_btn.setMaximumWidth(100)
             # 清理日志按钮现在在日志框内，需要重新设置大小
-            btn_width = 120
-            self.clear_log_btn.setFixedSize(btn_width, 25)
+            btn_width = 160
+            self.clear_log_btn.setFixedSize(btn_width, 36)  # 进一步增加按钮高度
         else:
             self.about_btn.setMaximumWidth(80)
             # 清理日志按钮现在在日志框内，需要重新设置大小
-            btn_width = 100
-            self.clear_log_btn.setFixedSize(btn_width, 25)
+            btn_width = 140
+            self.clear_log_btn.setFixedSize(btn_width, 36)  # 进一步增加按钮高度
 
         # 更新标签文本
         self.title_label.setText(get_text("app.title"))
         self.welcome_label.setText(get_text("app.welcome"))
         self.ide_label.setText(get_text("app.select_ide"))
+        self.patch_mode_label.setText(get_text("app.patch_mode"))  # 更新补丁模式标签
+        self.patch_title_label.setText(get_text("app.code_patch"))  # 更新代码补丁标题
+        self.log_label.setText(get_text("app.operation_log"))  # 更新操作日志标签
         self.version_label.setText(get_text("app.version"))
         self.copyright_label.setText(get_text("copyright.notice"))
         self.fraud_label.setText(get_text("copyright.report_fraud"))
@@ -503,3 +621,169 @@ class MainPage(QWidget):
 
         # 3秒后隐藏状态
         QTimer.singleShot(3000, self.status_label.hide_status)
+
+    # === 补丁相关方法 ===
+
+    def _get_selected_ide_type(self) -> IDEType:
+        """获取选中的IDE类型"""
+        ide_text = self.ide_combo.currentText()
+        ide_mapping = {
+            "VS Code": IDEType.VSCODE,
+            "Cursor": IDEType.CURSOR,
+            "Windsurf": IDEType.WINDSURF,
+            "JetBrains": IDEType.JETBRAINS
+        }
+        return ide_mapping.get(ide_text, IDEType.VSCODE)
+
+    def _get_selected_patch_mode(self) -> PatchMode:
+        """获取选中的补丁模式"""
+        mode_index = self.patch_mode_combo.currentIndex()
+        # 对应新的下拉框选项：随机假数据、完全阻止、空数据、隐身模式、调试模式
+        modes = [PatchMode.RANDOM, PatchMode.BLOCK, PatchMode.EMPTY, PatchMode.STEALTH, PatchMode.DEBUG]
+        return modes[mode_index] if mode_index < len(modes) else PatchMode.RANDOM
+
+    def _apply_patch_clicked(self):
+        """应用补丁按钮点击"""
+        if self.current_worker:
+            return
+
+        ide_type = self._get_selected_ide_type()
+        patch_mode = self._get_selected_patch_mode()
+
+        # 确认对话框
+        reply = QMessageBox.question(
+            self,
+            "确认补丁操作",
+            f"即将对 {get_ide_display_name(ide_type)} 应用代码补丁\n"
+            f"补丁模式: {patch_mode.value}\n\n"
+            f"此操作将修改扩展文件，建议先关闭IDE。\n"
+            f"系统会自动创建备份文件。\n\n"
+            f"是否继续？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        # 禁用按钮
+        self._set_buttons_enabled(False)
+
+        # 清空日志
+        self.log_text.clear()
+        self.log_text.append("开始应用代码补丁...")
+
+        # 创建并启动补丁Worker
+        self.current_worker = PatchWorker(ide_type, patch_mode)
+        self.current_worker.progress_updated.connect(self._add_log)
+        self.current_worker.patch_completed.connect(self._on_patch_completed)
+        self.current_worker.file_found.connect(self._on_patch_file_found)
+        self.current_worker.start()
+
+    def _restore_patch_clicked(self):
+        """恢复补丁按钮点击"""
+        if self.current_worker:
+            return
+
+        ide_type = self._get_selected_ide_type()
+
+        # 确认对话框
+        reply = QMessageBox.question(
+            self,
+            "确认恢复操作",
+            f"即将恢复 {get_ide_display_name(ide_type)} 的原始文件\n\n"
+            f"此操作将从备份文件恢复原始扩展文件。\n"
+            f"建议先关闭IDE。\n\n"
+            f"是否继续？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        # 禁用按钮
+        self._set_buttons_enabled(False)
+
+        # 清空日志
+        self.log_text.clear()
+        self.log_text.append("开始恢复原始文件...")
+
+        # 创建并启动恢复Worker
+        self.current_worker = RestoreWorker(ide_type)
+        self.current_worker.progress_updated.connect(self._add_log)
+        self.current_worker.restore_completed.connect(self._on_restore_completed)
+        self.current_worker.start()
+
+    def _scan_patch_clicked(self):
+        """扫描补丁状态按钮点击"""
+        if self.current_worker:
+            return
+
+        ide_type = self._get_selected_ide_type()
+
+        # 禁用按钮
+        self._set_buttons_enabled(False)
+
+        # 清空日志
+        self.log_text.clear()
+        self.log_text.append("开始扫描补丁状态...")
+
+        # 创建并启动扫描Worker
+        self.current_worker = ScanWorker([ide_type])
+        self.current_worker.progress_updated.connect(self._add_log)
+        self.current_worker.scan_completed.connect(self._on_scan_completed)
+        self.current_worker.file_found.connect(self._on_scan_file_found)
+        self.current_worker.start()
+
+    def _on_patch_completed(self, success: bool, message: str):
+        """补丁完成回调"""
+        self._on_task_completed(success)
+        if success:
+            self.patch_status_label.setText("状态: 补丁已应用")
+            self.patch_status_label.setStyleSheet("color: #059669; font-weight: bold;")
+        else:
+            self.patch_status_label.setText("状态: 补丁失败")
+            self.patch_status_label.setStyleSheet("color: #dc2626; font-weight: bold;")
+
+    def _on_restore_completed(self, success: bool, message: str):
+        """恢复完成回调"""
+        self._on_task_completed(success)
+        if success:
+            self.patch_status_label.setText("状态: 已恢复原始文件")
+            self.patch_status_label.setStyleSheet("color: #0891b2; font-weight: bold;")
+        else:
+            self.patch_status_label.setText("状态: 恢复失败")
+            self.patch_status_label.setStyleSheet("color: #dc2626; font-weight: bold;")
+
+    def _on_scan_completed(self, results: dict):
+        """扫描完成回调"""
+        self._on_task_completed(True)
+
+        # 更新状态显示
+        ide_type = self._get_selected_ide_type()
+        ide_results = results.get(ide_type.value, [])
+
+        if not ide_results:
+            self.patch_status_label.setText(get_text("status.not_scanned"))
+            self.patch_status_label.setStyleSheet("color: #6b7280; font-style: italic;")
+        else:
+            patched_status = get_text("patch.status.patched")
+            patched_count = sum(1 for r in ide_results if r['status'] == patched_status)
+            total_count = len(ide_results)
+
+            if patched_count == 0:
+                self.patch_status_label.setText(f"{get_text('status.not_scanned')}: {get_text('patch.status.not_patched')} ({total_count} 个文件)")
+                self.patch_status_label.setStyleSheet("color: #dc2626; font-weight: bold;")
+            elif patched_count == total_count:
+                self.patch_status_label.setText(f"{get_text('status.ready')}: {get_text('patch.status.patched')} ({patched_count}/{total_count})")
+                self.patch_status_label.setStyleSheet("color: #059669; font-weight: bold;")
+            else:
+                self.patch_status_label.setText(f"{get_text('status.warning')}: 部分补丁 ({patched_count}/{total_count})")
+                self.patch_status_label.setStyleSheet("color: #d97706; font-weight: bold;")
+
+    def _on_patch_file_found(self, file_path: str, status: str):
+        """补丁文件发现回调"""
+        self._add_log(f"📄 文件: {file_path} - {status}")
+
+    def _on_scan_file_found(self, ide_type: str, file_path: str, status: str):
+        """扫描文件发现回调"""
+        self._add_log(f"📄 {ide_type}: {file_path} - {status}")

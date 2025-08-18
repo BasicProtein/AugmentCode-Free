@@ -2,16 +2,38 @@
   "app": {
     "title": "AugmentCode-Free",
     "welcome": "欢迎使用",
-    "version": "v1.0.6 - 多IDE支持版本",
+    "version": "v2.0.3 - 国际化优化版本",
     "select_ide": "选择 IDE:",
     "language": "语言:",
-    "about": "关于"
+    "about": "关于",
+    "patch_mode": "补丁模式:",
+    "code_patch": "代码补丁",
+    "operation_log": "操作日志:",
+    "description": "AugmentCode-Free 是一个开源免费的IDE维护工具。",
+    "supported_ides": "支持的IDE:",
+    "ide_list": "• VS Code\n• Cursor\n• Windsurf",
+    "main_features": "主要功能:",
+    "feature_list": "• 清理IDE数据库\n• 修改遥测ID\n• 一键修改所有配置",
+    "opensource_notice": "本项目完全开源免费！",
+    "warning_notice": "⚠️ 重要提示：\n本项目完全开源免费！如果有人向您收费，请立即联系销售方退款并举报诈骗行为。",
+    "project_address": "项目地址：",
+    "dont_show_again": "启动时不再显示此对话框"
+  },
+  "patch_modes": {
+    "random": "随机假数据",
+    "block": "完全阻止",
+    "empty": "空数据",
+    "stealth": "隐身模式",
+    "debug": "调试模式"
   },
   "buttons": {
     "run_all": "一键修改所有配置",
-    "close_ide": "关闭选中的IDE", 
+    "close_ide": "关闭选中的IDE",
     "clean_db": "清理IDE数据库",
     "modify_ids": "修改IDE遥测ID",
+    "apply_patch": "应用补丁",
+    "restore_files": "恢复文件",
+    "scan_status": "扫描状态",
     "clear_log": "清空日志",
     "ok": "确定",
     "cancel": "取消",
@@ -44,7 +66,7 @@
   },
   "status": {
     "success": "✅ 操作完成",
-    "error": "❌ 操作失败", 
+    "error": "❌ 操作失败",
     "warning": "⚠️ 注意",
     "processing": "ℹ️ 处理中...",
     "ready": "就绪",
@@ -53,7 +75,8 @@
     "cleaning_db": "正在清理数据库...",
     "modifying_ids": "正在修改遥测ID...",
     "completed": "✅ 所有工具执行已完成",
-    "failed": "❌ 工具执行失败"
+    "failed": "❌ 工具执行失败",
+    "not_scanned": "状态: 未扫描"
   },
   "copyright": {
     "notice": "© 2025 BasicProtein. All rights reserved.",
@@ -92,5 +115,104 @@
     "proceeding": "尽管出现错误，仍继续下一步。",
     "all_finished": "{ide_name}的所有工具已完成执行序列。",
     "unsupported_ide": "不支持的IDE: {ide}。支持的IDE: vscode, cursor, windsurf, jetbrains"
+  },
+  "workers": {
+    "close_ide": {
+      "closing": "正在关闭 {ide_name}...",
+      "closed_process": "已关闭 {process_name} (PID: {pid})",
+      "close_failed": "关闭进程失败: {error}",
+      "success": "{ide_name} 已成功关闭",
+      "not_found": "未找到运行中的 {ide_name} 进程",
+      "error": "关闭 {ide_name} 时发生错误: {error}"
+    },
+    "clean_db": {
+      "starting": "开始清理 {ide_name} 数据库 (关键字: '{keyword}')",
+      "cleaning": "正在清理 {ide_name} 数据库...",
+      "entries_removed": "成功删除 {count} 个包含关键字的条目",
+      "no_entries": "未找到需要清理的条目",
+      "backup_created": "已自动创建数据库备份",
+      "completed": "数据库清理过程完成。",
+      "failed": "数据库清理失败: {error}",
+      "error": "清理数据库时发生错误: {error}"
+    },
+    "modify_ids": {
+      "starting": "开始修改 {ide_name} 遥测 ID",
+      "modifying": "正在修改 {ide_name} 遥测ID...",
+      "completed": "遥测 ID 修改过程完成。",
+      "failed": "遥测 ID 修改过程报告错误。请检查之前的消息。",
+      "error": "修改遥测 ID 时发生错误: {error}"
+    },
+    "run_all": {
+      "starting": "开始为 {ide_name} 执行所有工具",
+      "running": "正在执行一键修改...",
+      "step_close": "步骤 1: 关闭 {ide_name}",
+      "step_clean": "步骤 2: 清理 {ide_name} 数据库",
+      "step_modify": "步骤 3: 修改 {ide_name} 遥测ID",
+      "db_completed": "数据库清理完成",
+      "db_failed": "数据库清理失败",
+      "ids_completed": "遥测ID修改完成",
+      "ids_failed": "遥测ID修改失败",
+      "all_completed": "{ide_name}所有工具已完成执行序列。",
+      "partial_failed": "{ide_name}部分工具执行失败。",
+      "error": "运行所有工具时发生错误: {error}"
+    },
+    "enhanced_cleanup": {
+      "starting": "开始增强清理 {ide_name} (模式: {mode})",
+      "running": "正在执行增强清理...",
+      "results": "清理结果:",
+      "db_cleaned": "  数据库清理: 删除 {count} 个条目",
+      "files_deleted": "  文件删除: {count} 个文件",
+      "global_storage": "    - globalStorage: {count} 个",
+      "workspace_storage": "    - workspaceStorage: {count} 个",
+      "processes_killed": "  进程终止: {count} 个进程",
+      "completed": "增强清理完成。",
+      "failed": "增强清理失败",
+      "error": "增强清理时发生错误: {error}"
+    },
+    "process_manager": {
+      "checking": "检查 {ide_name} 进程...",
+      "found_processes": "找到 {count} 个 {ide_name} 进程:",
+      "no_processes": "未找到 {ide_name} 进程",
+      "killing": "终止 {ide_name} 进程...",
+      "all_killed": "所有进程已成功终止",
+      "partial_killed": "部分进程可能无法终止",
+      "error": "进程管理时发生错误: {error}"
+    }
+  },
+  "patch": {
+    "searching": "🔍 正在查找扩展文件...",
+    "not_found": "未找到 {ide_type} 的扩展文件",
+    "found_files": "📁 找到 {count} 个扩展文件",
+    "processing": "🔧 正在处理文件 {current}/{total}: {file}",
+    "already_patched": "⏭️ 文件已补丁，跳过: {file}",
+    "patch_success": "✅ 补丁成功: {file}",
+    "patch_failed": "❌ 补丁失败: {message}",
+    "completed": "补丁操作完成！成功处理 {success}/{total} 个文件",
+    "no_success": "没有文件被成功补丁",
+    "error": "补丁操作失败: {error}",
+    "restoring": "🔄 正在恢复文件 {current}/{total}: {file}",
+    "restore_success": "✅ 恢复成功: {file}",
+    "restore_skipped": "⚠️ 恢复跳过: {message}",
+    "restore_completed": "恢复操作完成！成功恢复 {success}/{total} 个文件",
+    "restore_no_success": "没有文件需要恢复或恢复失败",
+    "restore_error": "恢复操作失败: {error}",
+    "scanning": "🔍 开始扫描所有IDE的扩展文件...",
+    "scanning_ide": "📂 正在扫描 {ide_type}...",
+    "scan_completed": "✅ {ide_type} 扫描完成，找到 {count} 个文件",
+    "scan_finished": "🎉 扫描完成！",
+    "scan_error": "扫描失败: {error}",
+    "batch_starting": "🚀 开始批量补丁操作...",
+    "batch_processing": "🔧 正在处理 {ide_type} ({current}/{total})...",
+    "batch_no_files": "未找到扩展文件",
+    "batch_success": "成功补丁 {success}/{total} 个文件",
+    "batch_completed": "批量补丁完成！成功处理 {count} 个IDE",
+    "batch_partial": "批量补丁部分成功，请查看详细结果",
+    "batch_error": "批量补丁失败: {error}",
+    "status": {
+      "patched": "已补丁",
+      "not_patched": "未补丁",
+      "file_not_found": "文件不存在",
+      "status_unknown": "状态未知"
+    }
   }
 }

@@ -23,7 +23,7 @@ class ConfigManager:
         self.default_settings = {
             "language": "zh_CN",
             "first_run": True,
-            "window_geometry": "520x780",
+            "window_geometry": "600x780",  # 增加宽度从520到600
             "last_selected_ide": "VS Code",
             "show_welcome": True,
             "show_about_on_startup": True,
