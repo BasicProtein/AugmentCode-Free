@@ -83,8 +83,8 @@ class PatchManager:
         """生成会话随机化代码"""
         return ' const chars = "0123456789abcdef"; let randSessionId = ""; for (let i = 0; i < 36; i++) { randSessionId += i === 8 || i === 13 || i === 18 || i === 23 ? "-" : i === 14 ? "4" : i === 19 ? chars[8 + Math.floor(4 * Math.random())] : chars[Math.floor(16 * Math.random())]; } this.sessionId = randSessionId; this._userAgent = "";'
     
-    def _ensure_write_permissions(self, file_path: str) -> bool:
-        """确保文件有写权限"""
+    def _ensure_write_permissions(self, file_path: str) -> tuple[bool, int]:
+        """确保文件有写权限，返回(是否成功, 原始权限)"""
         try:
             file_path_obj = Path(file_path)
             if file_path_obj.exists():
@@ -95,9 +95,27 @@ class PatchManager:
                     new_permissions = current_permissions | stat.S_IWUSR
                     file_path_obj.chmod(new_permissions)
                     print_info(f"已为文件添加写权限: {file_path}")
-            return True
+                    # 返回成功状态和原始权限，以便后续恢复
+                    return True, current_permissions
+                else:
+                    # 已经有写权限，返回原始权限
+                    return True, current_permissions
+            return True, 0
         except Exception as e:
             print_warning(f"修改文件权限失败: {e}")
+            return False, 0
+    
+    def _restore_permissions(self, file_path: str, original_permissions: int) -> bool:
+        """恢复文件的原始权限"""
+        try:
+            if original_permissions != 0:
+                file_path_obj = Path(file_path)
+                if file_path_obj.exists():
+                    file_path_obj.chmod(original_permissions)
+                    print_info(f"已恢复文件原始权限: {file_path}")
+            return True
+        except Exception as e:
+            print_warning(f"恢复文件权限失败: {e}")
             return False
     
     def _create_backup(self, file_path: str) -> Tuple[bool, str]:
@@ -155,12 +173,15 @@ class PatchManager:
                 return PatchResult(False, "未找到async callApi函数")
             
             # 确保文件有写权限
-            if not self._ensure_write_permissions(file_path):
+            perm_success, original_permissions = self._ensure_write_permissions(file_path)
+            if not perm_success:
                 return PatchResult(False, "无法获取文件写权限")
             
             # 创建备份
             backup_success, backup_path = self._create_backup(file_path)
             if not backup_success:
+                # 尝试恢复原始权限
+                self._restore_permissions(file_path, original_permissions)
                 return PatchResult(False, "创建备份失败")
             
             # 生成完整补丁代码
@@ -174,6 +195,9 @@ class PatchManager:
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(patched_content)
+                
+                # 恢复原始权限
+                self._restore_permissions(file_path, original_permissions)
                 
                 print_success(f"补丁应用成功: {file_path}")
                 print_info(f"效果: {self.get_patch_description(patch_mode)}")
@@ -191,6 +215,9 @@ class PatchManager:
                 except:
                     print_error("恢复原始文件失败!")
                 
+                # 恢复原始权限
+                self._restore_permissions(file_path, original_permissions)
+                
                 return PatchResult(False, f"写入补丁文件失败: {e}")
                 
         except Exception as e:
@@ -206,11 +233,15 @@ class PatchManager:
                 return PatchResult(False, f"备份文件不存在: {backup_path}")
             
             # 确保目标文件有写权限
-            if not self._ensure_write_permissions(file_path):
+            perm_success, original_permissions = self._ensure_write_permissions(file_path)
+            if not perm_success:
                 return PatchResult(False, "无法获取文件写权限")
             
             shutil.copy2(backup_path, file_path)
             print_success(f"已从备份恢复: {file_path}")
+            
+            # 恢复原始权限
+            self._restore_permissions(file_path, original_permissions)
             
             return PatchResult(True, "恢复成功", file_path, str(backup_path))
             
