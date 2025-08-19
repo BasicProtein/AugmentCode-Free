@@ -7,21 +7,60 @@
 
 import re
 import os
+import stat
+import platform
 import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
 
-from .common_utils import print_info, print_success, print_error, print_warning, IDEType
-
-# 导入语言管理器，但要处理可能的导入错误
+# Handle imports properly for both direct execution and module usage
 try:
-    from language_manager import get_text
-    LANGUAGE_SUPPORT = True
+    from .common_utils import print_info, print_success, print_error, print_warning, IDEType
 except ImportError:
-    LANGUAGE_SUPPORT = False
-    def get_text(key, **kwargs):
-        return key
+    # Fallback for direct execution
+    try:
+        from augment_tools_core.common_utils import print_info, print_success, print_error, print_warning, IDEType
+    except ImportError:
+        # Minimal fallback implementations for direct testing
+        def print_info(msg): print(f"[INFO] {msg}")
+        def print_success(msg): print(f"[SUCCESS] {msg}")
+        def print_error(msg): print(f"[ERROR] {msg}")
+        def print_warning(msg): print(f"[WARNING] {msg}")
+        
+        # Mock IDEType for testing
+        class IDEType(Enum):
+            VSCODE = "vscode"
+            CURSOR = "cursor"
+            WINDSURF = "windsurf"
+            JETBRAINS = "jetbrains"
+
+# 导入语言管理器，但要处理可能的导入错误（优先相对导入，再尝试绝对导入）
+try:
+    from .language_manager import get_text
+    LANGUAGE_SUPPORT = True
+except Exception:
+    try:
+        from language_manager import get_text
+        LANGUAGE_SUPPORT = True
+    except Exception:
+        # 如果都失败，保持 LANGUAGE_SUPPORT = False，并提供一个支持关键字格式化的回退实现
+        LANGUAGE_SUPPORT = False
+        def get_text(key_path: str, **kwargs):
+            if kwargs:
+                try:
+                    return key_path.format(**kwargs)
+                except Exception:
+                    return key_path
+            return key_path
+
+# Local English fallback texts used when language support is unavailable
+FALLBACK_TEXTS = {
+    "patch.status.file_not_found": "file not found",
+    "patch.status.patched": "patched",
+    "patch.status.not_patched": "not patched",
+    "patch.status.status_unknown": "status unknown",
+}
 
 
 class PatchMode(Enum):
@@ -77,6 +116,44 @@ class PatchManager:
             PatchMode.DEBUG: "调试模式 - 假订阅 + 无限制 + 增强功能"
         }
         return descriptions.get(mode, "未知模式")
+    
+    def _ensure_write_permissions(self, file_path: str) -> bool:
+        """确保文件有写权限"""
+        try:
+            file_path_obj = Path(file_path)
+            if file_path_obj.exists():
+                # 只保留权限位，去掉文件类型等其他位
+                current_perms = stat.S_IMODE(file_path_obj.stat().st_mode)
+
+                # 平台检测：Windows 使用 stat.S_IWRITE，POSIX 使用 stat.S_IWUSR
+                if os.name == 'nt' or platform.system().lower().startswith('win'):
+                    write_flag = getattr(stat, 'S_IWRITE', None)
+                else:
+                    write_flag = getattr(stat, 'S_IWUSR', None)
+
+                # 如果无法获取适用的写标志，直接返回 True（无法修改权限）
+                if write_flag is None:
+                    return True
+
+                # 检查是否已有写权限
+                if not (current_perms & write_flag):
+                    new_perms = current_perms | write_flag
+                    try:
+                        # 只修改权限位
+                        file_path_obj.chmod(new_perms)
+                        print_info(f"已为文件添加写权限: {file_path}")
+                    except Exception:
+                        # 有的平台可能需要使用 os.chmod
+                        try:
+                            os.chmod(str(file_path_obj), new_perms)
+                            print_info(f"已为文件添加写权限: {file_path}")
+                        except Exception as e:
+                            print_warning(f"修改文件权限失败: {e}")
+                            return False
+            return True
+        except Exception as e:
+            print_warning(f"修改文件权限失败: {e}")
+            return False
     
     def _generate_session_randomizer(self) -> str:
         """生成会话随机化代码"""
@@ -136,6 +213,10 @@ class PatchManager:
             if not match:
                 return PatchResult(False, "未找到async callApi函数")
             
+            # 确保文件有写权限
+            if not self._ensure_write_permissions(file_path):
+                return PatchResult(False, "无法获取文件写权限")
+            
             # 创建备份
             backup_success, backup_path = self._create_backup(file_path)
             if not backup_success:
@@ -162,6 +243,8 @@ class PatchManager:
             except Exception as e:
                 # 尝试从备份恢复
                 try:
+                    # 确保恢复目标（file_path）具有写权限，以便可以将备份文件复制回去
+                    self._ensure_write_permissions(file_path)
                     shutil.copy2(backup_path, file_path)
                     print_warning("已从备份恢复原始文件")
                 except:
@@ -181,6 +264,10 @@ class PatchManager:
             if not backup_path.exists():
                 return PatchResult(False, f"备份文件不存在: {backup_path}")
             
+            # 确保恢复目标（file_path）具有写权限，以便可以将备份文件复制回去
+            if not self._ensure_write_permissions(file_path):
+                return PatchResult(False, "无法获取文件写权限")
+            
             shutil.copy2(backup_path, file_path)
             print_success(f"已从备份恢复: {file_path}")
             
@@ -193,15 +280,15 @@ class PatchManager:
         """获取文件的补丁状态"""
         try:
             if not os.path.exists(file_path):
-                return get_text("patch.status.file_not_found") if LANGUAGE_SUPPORT else "文件不存在"
+                return get_text("patch.status.file_not_found") if LANGUAGE_SUPPORT else FALLBACK_TEXTS.get("patch.status.file_not_found", "file not found")
 
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             if self._is_already_patched(content):
-                return get_text("patch.status.patched") if LANGUAGE_SUPPORT else "已补丁"
+                return get_text("patch.status.patched") if LANGUAGE_SUPPORT else FALLBACK_TEXTS.get("patch.status.patched", "patched")
             else:
-                return get_text("patch.status.not_patched") if LANGUAGE_SUPPORT else "未补丁"
+                return get_text("patch.status.not_patched") if LANGUAGE_SUPPORT else FALLBACK_TEXTS.get("patch.status.not_patched", "not patched")
 
         except Exception:
-            return get_text("patch.status.status_unknown") if LANGUAGE_SUPPORT else "状态未知"
+            return get_text("patch.status.status_unknown") if LANGUAGE_SUPPORT else FALLBACK_TEXTS.get("patch.status.status_unknown", "status unknown")

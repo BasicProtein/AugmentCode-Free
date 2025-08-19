@@ -2,8 +2,8 @@
   "language": "en_US",
   "first_run": false,
   "window_geometry": "680x780",
-  "last_selected_ide": "Cursor",
+  "last_selected_ide": "VS Code",
   "show_welcome": false,
-  "show_about_on_startup": true,
+  "show_about_on_startup": false,
   "theme": "default"
 }
