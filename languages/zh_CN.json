@@ -2,7 +2,7 @@
   "app": {
     "title": "AugmentCode-Free",
     "welcome": "欢迎使用",
-    "version": "v2.0.3 - 国际化优化版本",
+    "version": "v2.0.4 - 构建优化版",
     "select_ide": "选择 IDE:",
     "language": "语言:",
     "about": "关于",
@@ -213,6 +213,10 @@
       "not_patched": "未补丁",
       "file_not_found": "文件不存在",
       "status_unknown": "状态未知"
+    },
+    "errors": {
+      "readonly_file": "文件写入失败：目标文件处于只读状态\n文件路径：{file_path}\n解决方案：\n1. 在文件资源管理器中找到该文件\n2. 右键点击文件，选择'属性'\n3. 取消勾选'只读'选项\n4. 点击'确定'保存设置\n5. 重新执行补丁操作\n原始错误：{original_error}",
+      "write_failed": "文件写入失败：{original_error}\n请检查文件是否被其他程序占用或权限设置"
     }
   }
 }

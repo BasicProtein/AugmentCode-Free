@@ -7,6 +7,7 @@
 
 import re
 import os
+import stat
 import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -81,6 +82,43 @@ class PatchManager:
     def _generate_session_randomizer(self) -> str:
         """生成会话随机化代码"""
         return ' const chars = "0123456789abcdef"; let randSessionId = ""; for (let i = 0; i < 36; i++) { randSessionId += i === 8 || i === 13 || i === 18 || i === 23 ? "-" : i === 14 ? "4" : i === 19 ? chars[8 + Math.floor(4 * Math.random())] : chars[Math.floor(16 * Math.random())]; } this.sessionId = randSessionId; this._userAgent = "";'
+
+    def _check_file_readonly(self, file_path: str) -> bool:
+        """检查文件是否为只读状态"""
+        try:
+            file_path_obj = Path(file_path)
+            if not file_path_obj.exists():
+                return False
+
+            file_stat = file_path_obj.stat()
+            # 检查用户是否有写权限
+            return not (file_stat.st_mode & stat.S_IWUSR)
+        except Exception:
+            return False
+
+    def _get_permission_error_message(self, file_path: str, original_error: str) -> str:
+        """生成权限相关的错误提示信息"""
+        if self._check_file_readonly(file_path):
+            if LANGUAGE_SUPPORT:
+                return get_text("patch.errors.readonly_file",
+                              file_path=file_path,
+                              original_error=original_error)
+            else:
+                return (f"文件写入失败：目标文件处于只读状态\n"
+                       f"文件路径：{file_path}\n"
+                       f"解决方案：\n"
+                       f"1. 在文件资源管理器中找到该文件\n"
+                       f"2. 右键点击文件，选择'属性'\n"
+                       f"3. 取消勾选'只读'选项\n"
+                       f"4. 点击'确定'保存设置\n"
+                       f"5. 重新执行补丁操作\n"
+                       f"原始错误：{original_error}")
+        else:
+            if LANGUAGE_SUPPORT:
+                return get_text("patch.errors.write_failed",
+                              original_error=original_error)
+            else:
+                return f"文件写入失败：{original_error}\n请检查文件是否被其他程序占用或权限设置"
     
     def _create_backup(self, file_path: str) -> Tuple[bool, str]:
         """创建文件备份"""
@@ -166,8 +204,10 @@ class PatchManager:
                     print_warning("已从备份恢复原始文件")
                 except:
                     print_error("恢复原始文件失败!")
-                
-                return PatchResult(False, f"写入补丁文件失败: {e}")
+
+                # 生成详细的错误信息
+                error_message = self._get_permission_error_message(file_path, str(e))
+                return PatchResult(False, error_message)
                 
         except Exception as e:
             return PatchResult(False, f"补丁操作失败: {e}")
@@ -177,17 +217,19 @@ class PatchManager:
         try:
             file_path_obj = Path(file_path)
             backup_path = file_path_obj.with_name(f'{file_path_obj.stem}_ori{file_path_obj.suffix}')
-            
+
             if not backup_path.exists():
                 return PatchResult(False, f"备份文件不存在: {backup_path}")
-            
+
             shutil.copy2(backup_path, file_path)
             print_success(f"已从备份恢复: {file_path}")
-            
+
             return PatchResult(True, "恢复成功", file_path, str(backup_path))
-            
+
         except Exception as e:
-            return PatchResult(False, f"恢复失败: {e}")
+            # 生成详细的错误信息
+            error_message = self._get_permission_error_message(file_path, str(e))
+            return PatchResult(False, error_message)
     
     def get_patch_status(self, file_path: str) -> str:
         """获取文件的补丁状态"""

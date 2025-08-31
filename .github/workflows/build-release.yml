@@ -1,0 +1,234 @@
+name: Build Multi-Platform Release
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: true
+        default: '2.0.4'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            platform: windows
+            python-version: '3.10'
+          - os: macos-13
+            platform: macos
+            python-version: '3.10'
+          - os: ubuntu-22.04
+            platform: linux
+            python-version: '3.10'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install system dependencies (Linux)
+      if: matrix.platform == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgl1-mesa-glx \
+          libegl1-mesa \
+          libxrandr2 \
+          libxss1 \
+          libxcursor1 \
+          libxcomposite1 \
+          libasound2 \
+          libxi6 \
+          libxtst6 \
+          libglib2.0-0 \
+          libgtk-3-0
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Build application (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        pyinstaller --onefile --windowed --name "AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-windows" --add-data "languages;languages" --add-data "config;config" --hidden-import=PyQt6.QtCore --hidden-import=PyQt6.QtGui --hidden-import=PyQt6.QtWidgets --hidden-import=psutil --collect-all=PyQt6 main.py
+      shell: cmd
+
+    - name: Build application (macOS)
+      if: matrix.platform == 'macos'
+      run: |
+        # Check Python architecture
+        python -c "import platform; print(f'Python architecture: {platform.machine()}')"
+
+        # Create a proper macOS app bundle (without universal2 to avoid compatibility issues)
+        pyinstaller --onefile --windowed \
+          --name "AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-macos" \
+          --add-data "languages:languages" \
+          --add-data "config:config" \
+          --add-data "augment_tools_core:augment_tools_core" \
+          --add-data "gui_qt6:gui_qt6" \
+          --hidden-import=PyQt6.QtCore \
+          --hidden-import=PyQt6.QtGui \
+          --hidden-import=PyQt6.QtWidgets \
+          --hidden-import=psutil \
+          --hidden-import=sqlite3 \
+          --hidden-import=xml.etree.ElementTree \
+          --hidden-import=pathlib \
+          --hidden-import=json \
+          --hidden-import=uuid \
+          --hidden-import=platform \
+          --hidden-import=subprocess \
+          --hidden-import=threading \
+          --hidden-import=queue \
+          --hidden-import=shutil \
+          --hidden-import=tempfile \
+          --collect-all=PyQt6 \
+          --osx-bundle-identifier=com.basicprotein.augmentcode-free \
+          main.py
+
+        # Also create a standalone executable without app bundle for compatibility
+        pyinstaller --onefile \
+          --name "AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-macos-standalone" \
+          --add-data "languages:languages" \
+          --add-data "config:config" \
+          --add-data "augment_tools_core:augment_tools_core" \
+          --add-data "gui_qt6:gui_qt6" \
+          --hidden-import=PyQt6.QtCore \
+          --hidden-import=PyQt6.QtGui \
+          --hidden-import=PyQt6.QtWidgets \
+          --hidden-import=psutil \
+          --hidden-import=sqlite3 \
+          --hidden-import=xml.etree.ElementTree \
+          --hidden-import=pathlib \
+          --hidden-import=json \
+          --hidden-import=uuid \
+          --hidden-import=platform \
+          --hidden-import=subprocess \
+          --hidden-import=threading \
+          --hidden-import=queue \
+          --hidden-import=shutil \
+          --hidden-import=tempfile \
+          --collect-all=PyQt6 \
+          main.py
+
+        # Set proper permissions
+        chmod +x dist/AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-macos-standalone
+        chmod -R 755 dist/AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-macos.app
+
+    - name: Build application (Linux)
+      if: matrix.platform == 'linux'
+      run: |
+        pyinstaller --onefile \
+          --name "AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-linux" \
+          --add-data "languages:languages" \
+          --add-data "config:config" \
+          --hidden-import=PyQt6.QtCore \
+          --hidden-import=PyQt6.QtGui \
+          --hidden-import=PyQt6.QtWidgets \
+          --hidden-import=psutil \
+          --collect-all=PyQt6 \
+          main.py
+
+    - name: List dist contents (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        echo "Contents of dist directory:"
+        dir dist
+      shell: cmd
+
+    - name: List dist contents (Unix)
+      if: matrix.platform != 'windows'
+      run: |
+        echo "Contents of dist directory:"
+        ls -la dist/
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.platform }}-build
+        path: dist/*
+        retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        merge-multiple: true
+        path: ./artifacts
+    
+    - name: Display structure of downloaded files
+      run: |
+        echo "Downloaded artifacts:"
+        find ./artifacts -type f -exec ls -la {} \;
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ./artifacts/*
+        tag_name: ${{ github.event.inputs.version || github.ref_name }}
+        name: AugmentCode-Free v${{ github.event.inputs.version || github.ref_name }}
+        body: |
+          ## 🎉 AugmentCode-Free v${{ github.event.inputs.version || github.ref_name }} - 多平台发布
+          
+          ### 📦 下载文件
+          - **Windows**: `AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-windows.exe`
+          - **macOS**: `AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-macos.app` (应用包) 或 `AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-macos-standalone` (独立可执行文件)
+          - **Linux**: `AugmentCode-Free-v${{ github.event.inputs.version || github.ref_name }}-linux`
+          
+          ### 🚀 安装说明
+          
+          **Windows:**
+          1. 下载 `.exe` 文件
+          2. 双击运行（可能需要管理员权限）
+          3. 首次运行可能需要允许Windows Defender
+          
+          **macOS:**
+          1. 下载 macOS 版本（推荐使用 standalone 版本）
+          2. 添加执行权限: `chmod +x AugmentCode-Free-*-macos-standalone`
+          3. 运行: `./AugmentCode-Free-*-macos-standalone`
+          4. 如遇安全提示，请在系统偏好设置中允许
+          5. 或者使用 .app 版本：双击 `AugmentCode-Free-*-macos.app`
+          
+          **Linux:**
+          1. 下载 Linux 版本
+          2. 添加执行权限: `chmod +x AugmentCode-Free-*-linux`
+          3. 运行: `./AugmentCode-Free-*-linux`
+          
+          ### 🔧 技术改进 v${{ github.event.inputs.version || github.ref_name }}
+          - ✅ 权限检查增强：新增文件只读状态检测，提供友好的权限错误提示
+          - ✅ 国际化完善：错误信息支持中英文双语显示，包含详细解决方案
+          - ✅ macOS 构建修复：解决 "Failed to create parent directory structure" 错误
+          - ✅ 双版本支持：提供应用包(.app)和独立可执行文件两个版本
+          - ✅ 支持Windows、macOS、Linux多平台自动构建
+          - ✅ 完善构建文档：新增 macOS 故障排除指南和自动化脚本
+          
+          ### 📖 文档链接
+          - 📋 [构建说明](https://github.com/BasicProtein/AugmentCode-Free/blob/main/docs/BUILD_INSTRUCTIONS.md)
+          - 🔧 [macOS 故障排除指南](https://github.com/BasicProtein/AugmentCode-Free/blob/main/docs/MACOS_TROUBLESHOOTING.md)
+          - 📖 [完整文档](https://github.com/BasicProtein/AugmentCode-Free/blob/main/README.md)
+
+          ### ⚠️ 重要提示
+          - 本项目完全开源免费！
+          - 如有人向您收费，请立即举报诈骗行为
+          - 项目地址：https://github.com/BasicProtein/AugmentCode-Free
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,7 +2,7 @@
   "app": {
     "title": "AugmentCode-Free",
     "welcome": "Welcome",
-    "version": "v2.0.3 - Internationalization Optimized Version",
+    "version": "v2.0.4 - Build Optimized Version",
     "select_ide": "Select IDE:",
     "language": "Language:",
     "about": "About",
@@ -213,6 +213,10 @@
       "not_patched": "Not Patched",
       "file_not_found": "File Not Found",
       "status_unknown": "Status Unknown"
+    },
+    "errors": {
+      "readonly_file": "File write failed: Target file is in read-only mode\nFile path: {file_path}\nSolution:\n1. Find the file in File Explorer\n2. Right-click the file and select 'Properties'\n3. Uncheck the 'Read-only' option\n4. Click 'OK' to save settings\n5. Re-run the patch operation\nOriginal error: {original_error}",
+      "write_failed": "File write failed: {original_error}\nPlease check if the file is being used by other programs or permission settings"
     }
   }
 }

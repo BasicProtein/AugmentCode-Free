@@ -18,6 +18,27 @@ https://t.me/+rL2-my2wYy5hODA1
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/BasicProtein/AugmentCode-Free)
 
+#### 2025年8月22日更新 (v2.0.4)：
+
+**🔧 构建优化版 / Build Optimized Version**：
+
+**核心功能改进 / Core Feature Improvements:**
+- **权限检查增强 / Enhanced Permission Check**：新增文件只读状态检测，提供友好的权限错误提示 / Added read-only file detection with friendly permission error messages
+- **国际化完善 / Improved Internationalization**：错误信息支持中英文双语显示，包含详细解决方案 / Error messages support bilingual display with detailed solutions
+- **用户体验提升 / Enhanced User Experience**：当补丁失败时，自动检测是否为只读文件并提供具体操作指导 / Automatically detects read-only files when patching fails and provides specific guidance
+- **错误处理优化 / Optimized Error Handling**：区分权限问题和其他写入错误，提供针对性的解决建议 / Distinguishes permission issues from other write errors with targeted solutions
+
+**macOS 构建修复 / macOS Build Fixes:**
+- **构建问题修复 / Build Issues Fixed**：解决 "Failed to create parent directory structure" 错误 / Fixed "Failed to create parent directory structure" error
+- **双版本支持 / Dual Version Support**：提供应用包(.app)和独立可执行文件两个版本 / Provides both app bundle (.app) and standalone executable versions
+- **权限优化 / Permission Optimization**：自动处理 macOS 权限和安全设置 / Automatically handles macOS permissions and security settings
+- **架构支持 / Architecture Support**：支持 Intel 和 Apple Silicon 架构 / Supports Intel and Apple Silicon architectures
+
+**文档完善 / Documentation Improvements:**
+- **构建指南 / Build Guide**：更新 macOS 构建说明，包含详细的故障排除 / Updated macOS build instructions with detailed troubleshooting
+- **故障排除 / Troubleshooting**：新增专用的 [macOS 故障排除指南](https://github.com/BasicProtein/AugmentCode-Free/blob/master/docs/MACOS_TROUBLESHOOTING.md) / Added dedicated [macOS Troubleshooting Guide](https://github.com/BasicProtein/AugmentCode-Free/blob/master/docs/MACOS_TROUBLESHOOTING.md)
+- **自动化脚本 / Automation Scripts**：提供 `build_macos.sh` 自动构建脚本 / Provides `build_macos.sh` automated build script
+
 #### 2025年8月14日更新 (v2.0.2)：
 
 **🔍 扩展文件扫描优化**：
@@ -591,23 +612,41 @@ Use these tools at your own risk. Always back up important data before running m
 
 **（重要的事情说三遍！）**
 
+## 📦 下载与安装 / Download & Installation
+
+### 预编译版本 / Pre-built Releases
+
+从 [GitHub Releases](https://github.com/BasicProtein/AugmentCode-Free/releases) 下载最新版本：
+
+- **Windows**: `AugmentCode-Free-v2.0.4-windows.exe`
+- **macOS**: `AugmentCode-Free-v2.0.4-macos.app` 或 `AugmentCode-Free-v2.0.4-macos-standalone`
+- **Linux**: `AugmentCode-Free-v2.0.4-linux`
+
+### macOS 用户特别说明 / Special Notes for macOS Users
+
+如果遇到构建或运行问题，请参考：
+- 📖 [构建说明 / Build Instructions](https://github.com/BasicProtein/AugmentCode-Free/blob/main/docs/BUILD_INSTRUCTIONS.md)
+- 🔧 [macOS 故障排除指南 / macOS Troubleshooting Guide](https://github.com/BasicProtein/AugmentCode-Free/blob/main/docs/MACOS_TROUBLESHOOTING.md)
+
+## 🚀 使用方法 / Usage
+
 您可以通过两种方式使用 AugmentCode-Free：
 
-### 1. 图形用户界面 (GUI) - 推荐
+### 1. 图形用户界面 (GUI) - 推荐 / Graphical User Interface (Recommended)
 GUI 为所有功能提供了简单易用的操作界面。
 
--   **直接运行 (从项目根目录):**
+-   **直接运行 (从项目根目录) / Direct Run (from project root):**
     ```bash
     python main.py
     ```
 
--   **如果通过 pip 安装 (作为 `augment-tools-gui`):**
+-   **如果通过 pip 安装 (作为 `augment-tools-gui`) / If installed via pip:**
     ```bash
     augment-tools-gui
     ```
 
-### 2. 命令行界面 (CLI)
-适用于喜欢命令行或需要编写脚本自动执行操作的用户。
+### 2. 命令行界面 (CLI) / Command Line Interface
+适用于喜欢命令行或需要编写脚本自动执行操作的用户。/ For users who prefer command line or need to automate operations with scripts.
 
 -   **如果通过 pip 安装 (作为 `augment-tools`):**
     ```bash
